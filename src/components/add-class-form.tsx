@@ -35,43 +35,13 @@ const formSchema = z.object({
 });
 
 type AddClassFormProps = {
-<<<<<<< HEAD
-  onFormSubmit: (data: Omit<Class, 'id' | 'userId' | 'createdAt'>) => void;
-  classToEdit?: Class | null;
-};
-
-const defaultValues = {
-    name: '',
-    code: '',
-    instructor: '',
-    location: '',
-    accentColor: '#8B5CF6',
-    schedule: [{ days: [], startTime: '', endTime: '' }],
-};
-
-export function AddClassForm({ onFormSubmit, classToEdit }: AddClassFormProps) {
-=======
   onSave: (data: Omit<Class, 'id' | 'userId' | 'createdAt'>) => void;
   classToEdit?: Class | null;
 };
 
 export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
->>>>>>> 9d5bf8e (now inside the class details, add buttons for edit and delete)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-<<<<<<< HEAD
-    defaultValues: classToEdit || defaultValues,
-=======
-    defaultValues: {
-      name: '',
-      code: '',
-      instructor: '',
-      location: '',
-      description: '',
-      accentColor: '#8B5CF6',
-      schedule: [{ days: [], startTime: '', endTime: '' }],
-    },
->>>>>>> b480e44 (add a description category to classes that shows on details page but not)
   });
 
   useEffect(() => {
@@ -102,21 +72,9 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
     control: form.control,
     name: 'schedule',
   });
-  
-  useEffect(() => {
-    if (classToEdit) {
-      form.reset(classToEdit);
-    } else {
-      form.reset(defaultValues);
-    }
-  }, [classToEdit, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-<<<<<<< HEAD
-    onFormSubmit(values);
-=======
     onSave(values);
->>>>>>> 9d5bf8e (now inside the class details, add buttons for edit and delete)
   }
 
   const isEditing = !!classToEdit;
@@ -320,11 +278,7 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
             </Button>
         </div>
 
-<<<<<<< HEAD
         <Button type="submit" className="w-full">{isEditing ? 'Save Changes' : 'Add Class'}</Button>
-=======
-        <Button type="submit" className="w-full">{classToEdit ? 'Save Changes' : 'Add Class'}</Button>
->>>>>>> 9d5bf8e (now inside the class details, add buttons for edit and delete)
       </form>
     </Form>
   );
