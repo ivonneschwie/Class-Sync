@@ -42,6 +42,15 @@ type AddClassFormProps = {
 export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      code: '',
+      instructor: '',
+      location: '',
+      description: '',
+      accentColor: '#8B5CF6',
+      schedule: [{ days: [], startTime: '', endTime: '' }],
+    },
   });
 
   useEffect(() => {
