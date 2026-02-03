@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
+import { generateDisplayName } from '@/lib/username-generator';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -58,6 +59,10 @@ export function AuthForm({ mode }: AuthFormProps) {
         // Create user profile in Firestore
         setDocumentNonBlocking(doc(firestore, "users", user.uid), {
             email: user.email,
+            displayName: generateDisplayName(),
+            firstName: '',
+            lastName: '',
+            address: '',
             createdAt: serverTimestamp()
         }, { merge: true });
 

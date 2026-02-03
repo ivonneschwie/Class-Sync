@@ -43,3 +43,13 @@ export type FlashcardDeck = {
   flashcards: Flashcard[];
   createdAt: Timestamp;
 };
+
+export type UserProfile = {
+  id: string; // Firestore document ID
+  email: string;
+  displayName: string;
+  firstName?: string;
+  lastName?: string;
+  address?: string;
+  createdAt: Timestamp;
+};

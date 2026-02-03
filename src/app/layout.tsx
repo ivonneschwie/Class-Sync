@@ -3,6 +3,7 @@ import { MainLayout } from '@/components/main-layout';
 import { Toaster } from "@/components/ui/toaster"
 import { Providers } from '@/components/providers';
 import { FirebaseClientProvider } from '@/firebase';
+import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -24,14 +25,19 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>
-          <Providers>
-            <MainLayout>{children}</MainLayout>
-            <Toaster />
-          </Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Providers>
+              <MainLayout>{children}</MainLayout>
+              <Toaster />
+            </Providers>
+          </ThemeProvider>
         </FirebaseClientProvider>
       </body>
     </html>
   );
 }
-
-    
