@@ -1,0 +1,176 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useAuth, useUser } from '@/firebase';
+import { cn } from '@/lib/utils';
+import { Calendar, Bot, Menu, LayoutGrid, BookOpen, Layers, LogOut, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/icons';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+
+const navItems = [
+  {
+    href: '/',
+    icon: Calendar,
+    label: 'Schedule',
+  },
+  {
+    href: '/timetable',
+    icon: LayoutGrid,
+    label: 'Time Table',
+  },
+  {
+    href: '/summarizer',
+    icon: Bot,
+    label: 'AI Summarizer',
+  },
+  {
+    href: '/lesson-catalog',
+    icon: BookOpen,
+    label: 'Lesson Catalog',
+  },
+  {
+    href: '/flashcards',
+    icon: Layers,
+    label: 'Flashcards',
+  },
+];
+
+export function MainLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, isUserLoading } = useUser();
+
+  const isAuthPage = pathname === '/login' || pathname === '/signup';
+
+  useEffect(() => {
+    if (!isUserLoading && !user && !isAuthPage) {
+      router.push('/login');
+    }
+  }, [isUserLoading, user, isAuthPage, router]);
+
+  if (isUserLoading || (!user && !isAuthPage)) {
+    return (
+        <div className="flex h-screen w-full items-center justify-center bg-background">
+            <div className="flex flex-col items-center gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-muted-foreground">Loading...</p>
+            </div>
+        </div>
+    );
+  }
+
+  if (isAuthPage) {
+    return <>{children}</>
+  }
+
+  return (
+    <div className="min-h-screen w-full">
+      <DesktopSidebar pathname={pathname} />
+      <div className="flex flex-col md:pl-[220px] lg:pl-[280px]">
+        <MobileHeader pathname={pathname} />
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function DesktopSidebar({ pathname }: { pathname: string }) {
+  const auth = useAuth();
+  
+  return (
+    <aside className="hidden border-r bg-card md:block fixed top-0 left-0 z-20 h-screen w-[220px] lg:w-[280px]">
+      <div className="flex h-full flex-col gap-2">
+        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+          <Link href="/" className="flex items-center gap-2 font-headline font-semibold text-lg">
+            <Logo className="h-6 w-6 text-primary" />
+            <span>ClassSync</span>
+          </Link>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                  pathname === item.href && "bg-muted text-primary"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <div className="mt-auto p-4">
+            <Button variant="outline" className="w-full" onClick={() => auth.signOut()}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+            </Button>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function MobileHeader({ pathname }: { pathname: string }) {
+  const auth = useAuth();
+
+  return (
+    <header className="sticky top-0 z-[11] flex h-14 items-center gap-4 border-b bg-card px-4 md:hidden">
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="shrink-0">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle navigation menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="flex flex-col p-0 max-w-[280px]">
+          <SheetHeader className="h-14 flex flex-row items-center border-b px-4 space-y-0">
+            <SheetTitle asChild>
+              <Link
+                href="/"
+                className="flex items-center gap-2 font-headline font-semibold"
+              >
+                <Logo className="h-6 w-6 text-primary" />
+                <span>ClassSync</span>
+              </Link>
+            </SheetTitle>
+          </SheetHeader>
+          <nav className="grid gap-2 text-lg font-medium p-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground",
+                  pathname === item.href && "bg-muted text-foreground"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+            <div className="mt-auto p-4">
+                <Button variant="outline" className="w-full" onClick={() => auth.signOut()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                </Button>
+            </div>
+        </SheetContent>
+      </Sheet>
+      <div className="w-full flex-1">
+        <h1 className="font-headline text-lg font-semibold">
+            {navItems.find(item => item.href === pathname)?.label || 'Dashboard'}
+        </h1>
+      </div>
+    </header>
+  );
+}
