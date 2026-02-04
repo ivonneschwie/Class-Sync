@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { summarizeLectureNotes } from '@/ai/flows/summarize-lecture-notes';
-import { transcribeAudio } from '@/ai/flows/transcribe-audio';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -28,6 +27,19 @@ type SummaryOutput = {
   clarificationQuestions: string;
 };
 
+// For Web Speech API, which might not be fully typed in all environments
+interface CustomSpeechRecognition extends SpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
+  }
+}
+
 export function SummarizerForm() {
   const [summaryOutput, setSummaryOutput] = useState<SummaryOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,9 +47,9 @@ export function SummarizerForm() {
   const { addSummary } = useSummaries();
   const { classes } = useClasses();
   
-  const [isRecording, setIsRecording] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
+  const initialNotesRef = useRef<string>('');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -80,65 +92,83 @@ export function SummarizerForm() {
     }
   }
   
-  const handleToggleRecording = async () => {
-    if (isRecording) {
-      mediaRecorderRef.current?.stop();
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = recorder;
-        audioChunksRef.current = [];
+  const handleToggleTranscription = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        recorder.ondataavailable = (event) => {
-          audioChunksRef.current.push(event.data);
-        };
-
-        recorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const reader = new FileReader();
-          reader.readAsDataURL(audioBlob);
-          reader.onloadend = async () => {
-            const base64Audio = reader.result as string;
-            if (!base64Audio) return;
-
-            try {
-              toast({ title: 'Transcribing...', description: 'Please wait while we process your speech.' });
-              const { text: transcribedText } = await transcribeAudio({ audioDataUri: base64Audio });
-              const currentNotes = form.getValues('notes');
-              form.setValue('notes', (currentNotes ? currentNotes + '\n\n' : '') + transcribedText, { shouldValidate: true });
-            } catch (error) {
-              console.error('Error transcribing audio:', error);
-              let description = 'Failed to transcribe audio. Please try again.';
-              if (error instanceof Error && (error.message.includes('429') || error.message.includes('Too Many Requests'))) {
-                description = 'You\'ve made too many requests in a short period. Please wait a minute and try again.';
-              }
-              toast({
-                variant: 'destructive',
-                title: 'Transcription Failed',
-                description: description,
-              });
-            } finally {
-              stream.getTracks().forEach(track => track.stop());
-            }
-          };
-          setIsRecording(false);
-        };
-
-        recorder.start();
-        setIsRecording(true);
-        toast({ title: 'Recording started...', description: 'Click the square icon to stop.' });
-      } catch (error) {
-        console.error("Error accessing microphone:", error);
-        toast({
-            variant: "destructive",
-            title: "Microphone Error",
-            description: "Could not access microphone. Please check your browser permissions.",
-        });
-      }
+    if (!SpeechRecognition) {
+      toast({
+        variant: 'destructive',
+        title: 'Browser Not Supported',
+        description: 'Live transcription is not supported in your browser.',
+      });
+      return;
     }
+
+    if (isTranscribing) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const recognition = new SpeechRecognition() as CustomSpeechRecognition;
+    recognitionRef.current = recognition;
+
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsTranscribing(true);
+      toast({ title: 'Transcription started...', description: 'Start speaking. Click the square icon to stop.' });
+    };
+
+    recognition.onend = () => {
+      setIsTranscribing(false);
+      recognitionRef.current = null;
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+       let errorMsg = `An error occurred: ${event.error}`;
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          errorMsg = "Microphone access was denied. Please allow microphone access in your browser settings.";
+      } else if (event.error === 'no-speech') {
+          errorMsg = "No speech was detected. Please try again.";
+      }
+      toast({
+        variant: 'destructive',
+        title: 'Transcription Error',
+        description: errorMsg,
+      });
+      setIsTranscribing(false);
+    };
+
+    initialNotesRef.current = form.getValues('notes');
+    
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      
+      for (const result of event.results) {
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript + ' ';
+        } else {
+          interimTranscript += result[0].transcript;
+        }
+      }
+
+      const initialText = initialNotesRef.current ? initialNotesRef.current + ' ' : '';
+      form.setValue('notes', initialText + finalTranscript + interimTranscript, { shouldValidate: true });
+    };
+
+    recognition.start();
   };
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
 
   const formattedQuestions = summaryOutput?.clarificationQuestions.split('\n').filter(q => q.trim() !== '' && q.trim() !== '-');
 
@@ -179,7 +209,7 @@ export function SummarizerForm() {
                 <div className="relative">
                   <FormControl>
                     <Textarea
-                      placeholder="Paste your notes here, or use the microphone to dictate..."
+                      placeholder="Paste your notes here, or use the microphone for live transcription..."
                       className="min-h-[200px] resize-y pr-12"
                       {...field}
                     />
@@ -189,17 +219,17 @@ export function SummarizerForm() {
                     variant="ghost"
                     size="icon"
                     className="absolute right-2 top-2 h-8 w-8 text-muted-foreground"
-                    onClick={handleToggleRecording}
+                    onClick={handleToggleTranscription}
                   >
-                    {isRecording ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Mic className="h-4 w-4" />}
-                    <span className="sr-only">{isRecording ? 'Stop recording' : 'Start recording'}</span>
+                    {isTranscribing ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Mic className="h-4 w-4" />}
+                    <span className="sr-only">{isTranscribing ? 'Stop transcription' : 'Start transcription'}</span>
                   </Button>
                 </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={isLoading || isRecording} className="w-full sm:w-auto">
+          <Button type="submit" disabled={isLoading || isTranscribing} className="w-full sm:w-auto">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -283,5 +313,3 @@ export function SummarizerForm() {
     </div>
   );
 }
-
-    
