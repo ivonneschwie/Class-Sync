@@ -165,21 +165,40 @@ export function SummarizerForm() {
         }
       }
 
-      setNotesContent(prevNotes => {
-        let newNotes = prevNotes;
-        // First, remove the last interim transcript if it's there.
-        // This prevents duplicating the interim part when it becomes final.
-        if (lastInterimTranscriptRef.current && newNotes.endsWith(lastInterimTranscriptRef.current)) {
-          newNotes = newNotes.slice(0, -lastInterimTranscriptRef.current.length);
+      setNotesContent(currentContent => {
+        let baseContent = currentContent;
+        // Remove the previous interim transcript to avoid duplication
+        if (lastInterimTranscriptRef.current && baseContent.endsWith(lastInterimTranscriptRef.current)) {
+            baseContent = baseContent.slice(0, -lastInterimTranscriptRef.current.length);
+        }
+
+        // Process final transcript
+        let newFinalText = finalTranscript;
+        if (newFinalText) {
+            // Add a space before appending if there's content that doesn't end with a space
+            if (baseContent && !baseContent.endsWith(' ')) {
+                newFinalText = ' ' + newFinalText;
+            }
+            // Add a space after a period
+            if (newFinalText.endsWith('.')) {
+                newFinalText += ' ';
+            }
+        }
+
+        // Process interim transcript
+        let newInterimText = interimTranscript;
+        if (newInterimText) {
+            const tempBase = baseContent + newFinalText;
+            // Add a space before appending if there's content that doesn't end with a space
+            if (tempBase && !tempBase.endsWith(' ')) {
+                newInterimText = ' ' + newInterimText;
+            }
         }
         
-        // Append the new final part (if any) and the new interim part.
-        newNotes += finalTranscript + interimTranscript;
-        
-        // Store the new interim part for the next event.
-        lastInterimTranscriptRef.current = interimTranscript;
-        
-        return newNotes;
+        // Save the appended interim text to the ref so it can be removed next time
+        lastInterimTranscriptRef.current = newInterimText;
+
+        return baseContent + newFinalText + newInterimText;
       });
     };
 
