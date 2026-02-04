@@ -50,6 +50,8 @@ export function SummarizerForm() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
 
+  const [notesContent, setNotesContent] = useState('');
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,6 +59,11 @@ export function SummarizerForm() {
       subject: undefined,
     },
   });
+
+  // Sync local state back to the form for validation and submission
+  useEffect(() => {
+    form.setValue('notes', notesContent, { shouldValidate: true });
+  }, [notesContent, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -141,21 +148,33 @@ export function SummarizerForm() {
       setIsTranscribing(false);
     };
 
-    let finalTranscript = form.getValues('notes');
-    
+    // This ref holds the text from before the current interim result
+    const baseTranscriptRef = React.createRef<string>();
+    baseTranscriptRef.current = notesContent;
+
     recognition.onresult = (event) => {
       let interimTranscript = '';
-      
+      let finalTranscript = '';
+
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + ' ';
+          finalTranscript += event.results[i][0].transcript;
         } else {
           interimTranscript += event.results[i][0].transcript;
         }
       }
       
-      const separator = finalTranscript.length > 0 && !finalTranscript.endsWith(' ') ? ' ' : '';
-      form.setValue('notes', finalTranscript + separator + interimTranscript, { shouldValidate: true });
+      // Use functional update to avoid stale state
+      setNotesContent(prevNotes => {
+        // If there's a final part, update the base for next time.
+        if (finalTranscript) {
+          const newBase = (prevNotes.substring(0, prevNotes.length - interimTranscript.length).trim() + ' ' + finalTranscript.trim()).trim() + ' ';
+          baseTranscriptRef.current = newBase;
+          return newBase;
+        }
+        // Otherwise, just append the new interim part to the base.
+        return baseTranscriptRef.current + interimTranscript;
+      });
     };
 
     recognition.start();
@@ -209,6 +228,8 @@ export function SummarizerForm() {
                     placeholder="Paste your notes here, or use the microphone for live transcription..."
                     className="min-h-[200px] resize-y"
                     {...field}
+                    value={notesContent}
+                    onChange={(e) => setNotesContent(e.target.value)}
                   />
                 </FormControl>
                 <FormMessage />
