@@ -248,10 +248,10 @@ export function SummarizerForm() {
                   />
                 </FormControl>
                 {isTranscribing && (
-                  <div className="mt-2 rounded-md bg-[hsl(154,50%,30%)] font-headline text-lg animate-in fade-in-50 overflow-hidden shadow-[0_0_15px_2px_hsl(154,50%,30%/0.8)] px-4 py-3">
+                  <div className="mt-2 rounded-md bg-[hsl(154,50%,40%)] font-headline text-lg animate-in fade-in-50 overflow-hidden shadow-[0_0_15px_2px_hsl(154,50%,40%/0.8)] px-4 py-3">
                     <div
                       ref={scrollContainerRef}
-                      className="no-scrollbar overflow-x-auto max-w-[80%] md:max-w-[60%]"
+                      className="no-scrollbar overflow-x-auto max-w-[80%]"
                     >
                       <span className="whitespace-nowrap text-slate-100">
                         {liveTranscript || 'Listening...'}
