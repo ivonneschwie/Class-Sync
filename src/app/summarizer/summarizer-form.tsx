@@ -127,7 +127,7 @@ export function SummarizerForm() {
 
     recognition.onstart = () => {
       setIsTranscribing(true);
-      // When starting, store whatever is already in the box.
+      // When starting, store whatever is already in the box. This is our baseline.
       baseTranscriptRef.current = notesContent ? notesContent + ' ' : '';
       toast({ title: 'Transcription started...', description: 'Start speaking. Click the stop button when you are done.' });
     };
@@ -157,24 +157,21 @@ export function SummarizerForm() {
         let interim_transcript = '';
         let final_transcript = '';
 
-        // Iterate through all the results from the beginning of the speech
+        // Rebuild the full transcript from all results from this session
         for (let i = 0; i < event.results.length; ++i) {
             const transcriptPart = event.results[i][0].transcript;
-            // If the result is final, append it to the final transcript
             if (event.results[i].isFinal) {
                 final_transcript += transcriptPart;
             } else {
-                // Otherwise, it's part of the interim transcript
                 interim_transcript += transcriptPart;
             }
         }
         
-        // Add a space after a period if it's the end of the final part
-        if (final_transcript.endsWith('.')) {
+        const lastResultIsFinal = event.results[event.results.length - 1].isFinal;
+        if (lastResultIsFinal && final_transcript.trim().endsWith('.')) {
             final_transcript += ' ';
         }
         
-        // Update the content by combining the base text with the new transcript
         setNotesContent(baseTranscriptRef.current + final_transcript + interim_transcript);
     };
 
@@ -232,9 +229,6 @@ export function SummarizerForm() {
                     value={notesContent}
                     onChange={(e) => {
                         setNotesContent(e.target.value);
-                        if (!isTranscribing) {
-                            baseTranscriptRef.current = e.target.value;
-                        }
                     }}
                   />
                 </FormControl>
