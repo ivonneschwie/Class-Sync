@@ -216,12 +216,12 @@ export function SummarizerForm() {
                   </FormControl>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="secondary"
                     size="icon"
-                    className="absolute right-2 top-2 h-8 w-8 text-muted-foreground"
+                    className="absolute right-2 top-2"
                     onClick={handleToggleTranscription}
                   >
-                    {isTranscribing ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Mic className="h-4 w-4" />}
+                    {isTranscribing ? <Square className="h-5 w-5 text-red-500 fill-current" /> : <Mic className="h-5 w-5" />}
                     <span className="sr-only">{isTranscribing ? 'Stop transcription' : 'Start transcription'}</span>
                   </Button>
                 </div>
