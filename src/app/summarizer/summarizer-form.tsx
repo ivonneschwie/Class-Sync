@@ -159,24 +159,22 @@ export function SummarizerForm() {
 
     recognition.onresult = (event) => {
       let interim_transcript = '';
-      let final_transcript = '';
+      finalTranscriptFromSessionRef.current = '';
 
       for (let i = 0; i < event.results.length; ++i) {
         const transcriptPart = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          final_transcript += transcriptPart;
+          finalTranscriptFromSessionRef.current += transcriptPart;
+          // Add a space after a period if it's the end of a final transcript part
+          if (finalTranscriptFromSessionRef.current.trim().endsWith('.')) {
+              finalTranscriptFromSessionRef.current += ' ';
+          }
         } else {
           interim_transcript += transcriptPart;
         }
       }
       
-      const lastResultIsFinal = event.results[event.results.length - 1].isFinal;
-      if (lastResultIsFinal && final_transcript.trim().endsWith('.')) {
-        final_transcript += ' ';
-      }
-
-      finalTranscriptFromSessionRef.current = final_transcript;
-      setLiveTranscript(final_transcript + interim_transcript);
+      setLiveTranscript(finalTranscriptFromSessionRef.current + interim_transcript);
     };
 
     recognition.start();
@@ -238,8 +236,18 @@ export function SummarizerForm() {
                   />
                 </FormControl>
                 {isTranscribing && (
-                  <div className="mt-2 p-3 border rounded-md bg-muted/50 min-h-[40px] text-sm text-muted-foreground animate-in fade-in-50">
-                    {liveTranscript || 'Listening...'}
+                  <div className="mt-2 rounded-md bg-muted/50 text-lg font-headline animate-in fade-in-50 overflow-hidden">
+                    <div
+                      className="px-4 py-3 no-scrollbar overflow-x-auto"
+                      style={{
+                        textShadow:
+                          '0 0 5px hsl(var(--primary) / 0.4), 0 0 10px hsl(var(--accent) / 0.4)',
+                      }}
+                    >
+                      <span className="whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        {liveTranscript || 'Listening...'}
+                      </span>
+                    </div>
                   </div>
                 )}
                 <FormMessage />
