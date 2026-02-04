@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -63,7 +64,7 @@ export function SummarizerForm() {
         const container = scrollContainerRef.current;
         const text = liveTextRef.current;
         
-        const scrollThreshold = container.clientWidth * 0.90; // 90%
+        const scrollThreshold = container.clientWidth * 0.90;
         const isOverflowing = text.scrollWidth > scrollThreshold;
         
         if (isOverflowing) {
@@ -106,7 +107,7 @@ export function SummarizerForm() {
     }
   }
 
-  // Completely refactored transcription logic from scratch
+  // --- Completely New, Simplified Transcription Logic ---
   const handleToggleTranscription = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -121,35 +122,34 @@ export function SummarizerForm() {
 
     if (isTranscribing) {
       recognitionRef.current?.stop();
-      // onend will handle the cleanup and state changes
+      // onend will handle cleanup
       return;
     }
 
-    // --- Start new transcription session ---
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
 
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    // This variable will only exist for the duration of this single session
+    let finalTranscript = '';
 
-    let finalTranscript = ''; // This variable will live only inside this function's scope for this session
+    recognition.continuous = true;
+    recognition.interimResults = false; // We no longer need interim results
+    recognition.lang = 'en-US';
 
     recognition.onstart = () => {
       setIsTranscribing(true);
       setLiveTranscript('Listening...');
-      toast({ title: 'Transcription started...', description: 'Click the stop button when you are done.' });
+      toast({ title: 'Transcription started...', description: 'Click stop when finished.' });
     };
 
     recognition.onend = () => {
       setIsTranscribing(false);
       setLiveTranscript('');
-      recognitionRef.current = null; // Clean up the instance
+      recognitionRef.current = null;
 
       if (finalTranscript.trim()) {
           const currentNotes = form.getValues('notes');
-          // Add a space if there's existing text, then add the new transcript.
-          const newNotes = (currentNotes.trim() ? currentNotes.trim() + ' ' : '') + finalTranscript.trim().replace(/\.([^ \n])/g, '. $1') + ' ';
+          const newNotes = (currentNotes.trim() ? currentNotes.trim() + ' ' : '') + finalTranscript.trim() + ' ';
           form.setValue('notes', newNotes, { shouldValidate: true, shouldDirty: true });
       }
     };
@@ -158,38 +158,28 @@ export function SummarizerForm() {
       console.error('Speech recognition error', event.error);
        let errorMsg = `An error occurred: ${event.error}`;
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          errorMsg = "Microphone access was denied. Please allow microphone access in your browser settings.";
+          errorMsg = "Microphone access was denied. Please allow it in your browser settings.";
       } else if (event.error === 'no-speech') {
-          errorMsg = "No speech was detected. Please try again.";
+          errorMsg = "No speech was detected.";
       }
       toast({
         variant: 'destructive',
         title: 'Transcription Error',
         description: errorMsg,
       });
-      
-      // Also trigger onend cleanup logic
-      setIsTranscribing(false);
-      setLiveTranscript('');
-      recognitionRef.current = null;
+      // The onend event will fire automatically after an error.
     };
 
     recognition.onresult = (event: any) => {
-      let interimTranscript = '';
-      // Reset finalTranscript for this session on each event and rebuild it
-      // This is the key to preventing duplication. We trust the event.results as the source of truth.
-      finalTranscript = ''; 
-
-      for (let i = 0; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
+      // Rebuild the final transcript from scratch for this session on every result.
+      // This is the most robust way to prevent duplication.
+      let currentFinalTranscript = '';
+      for (let i = 0; i < event.results.length; i++) {
+          currentFinalTranscript += event.results[i][0].transcript;
       }
       
-      // Update the live display
-      setLiveTranscript(finalTranscript + interimTranscript || 'Listening...');
+      finalTranscript = currentFinalTranscript;
+      setLiveTranscript(finalTranscript || 'Listening...');
     };
 
     recognition.start();
