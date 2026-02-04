@@ -50,6 +50,7 @@ export function SummarizerForm() {
   
   const [isTranscribing, setIsTranscribing] = useState(false);
   const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
+  const lastInterimTranscriptRef = useRef<string>(''); // For robust live editing
 
   const [notesContent, setNotesContent] = useState('');
 
@@ -125,12 +126,14 @@ export function SummarizerForm() {
 
     recognition.onstart = () => {
       setIsTranscribing(true);
+      lastInterimTranscriptRef.current = '';
       toast({ title: 'Transcription started...', description: 'Start speaking. Click the stop button when you are done.' });
     };
 
     recognition.onend = () => {
       setIsTranscribing(false);
       recognitionRef.current = null;
+      lastInterimTranscriptRef.current = '';
     };
 
     recognition.onerror = (event) => {
@@ -149,32 +152,34 @@ export function SummarizerForm() {
       setIsTranscribing(false);
     };
 
-    // This ref holds the text from before the current interim result
-    const baseTranscriptRef = React.createRef<string>();
-    baseTranscriptRef.current = notesContent;
-
     recognition.onresult = (event) => {
       let interimTranscript = '';
       let finalTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcriptPart = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+          finalTranscript += transcriptPart;
         } else {
-          interimTranscript += event.results[i][0].transcript;
+          interimTranscript += transcriptPart;
         }
       }
-      
-      // Use functional update to avoid stale state
+
       setNotesContent(prevNotes => {
-        // If there's a final part, update the base for next time.
-        if (finalTranscript) {
-          const newBase = (prevNotes.substring(0, prevNotes.length - interimTranscript.length).trim() + ' ' + finalTranscript.trim()).trim() + ' ';
-          baseTranscriptRef.current = newBase;
-          return newBase;
+        let newNotes = prevNotes;
+        // First, remove the last interim transcript if it's there.
+        // This prevents duplicating the interim part when it becomes final.
+        if (lastInterimTranscriptRef.current && newNotes.endsWith(lastInterimTranscriptRef.current)) {
+          newNotes = newNotes.slice(0, -lastInterimTranscriptRef.current.length);
         }
-        // Otherwise, just append the new interim part to the base.
-        return baseTranscriptRef.current + interimTranscript;
+        
+        // Append the new final part (if any) and the new interim part.
+        newNotes += finalTranscript + interimTranscript;
+        
+        // Store the new interim part for the next event.
+        lastInterimTranscriptRef.current = interimTranscript;
+        
+        return newNotes;
       });
     };
 
