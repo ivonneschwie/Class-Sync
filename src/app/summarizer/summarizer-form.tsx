@@ -52,8 +52,8 @@ export function SummarizerForm() {
   const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
   const [notesContent, setNotesContent] = useState('');
   
-  // This ref will hold the transcript content that exists *before* transcription starts.
-  const baseTranscriptRef = useRef<string>('');
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const finalTranscriptFromSessionRef = useRef('');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -127,13 +127,17 @@ export function SummarizerForm() {
 
     recognition.onstart = () => {
       setIsTranscribing(true);
-      // When starting, store whatever is already in the box. This is our baseline.
-      baseTranscriptRef.current = notesContent ? notesContent + ' ' : '';
+      setLiveTranscript('');
+      finalTranscriptFromSessionRef.current = '';
       toast({ title: 'Transcription started...', description: 'Start speaking. Click the stop button when you are done.' });
     };
 
     recognition.onend = () => {
       setIsTranscribing(false);
+      setNotesContent(prev => 
+        (prev.trim() ? prev.trim() + ' ' : '') + finalTranscriptFromSessionRef.current.trim()
+      );
+      setLiveTranscript('');
       recognitionRef.current = null;
     };
 
@@ -154,25 +158,25 @@ export function SummarizerForm() {
     };
 
     recognition.onresult = (event) => {
-        let interim_transcript = '';
-        let final_transcript = '';
+      let interim_transcript = '';
+      let final_transcript = '';
 
-        // Rebuild the full transcript from all results from this session
-        for (let i = 0; i < event.results.length; ++i) {
-            const transcriptPart = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-                final_transcript += transcriptPart;
-            } else {
-                interim_transcript += transcriptPart;
-            }
+      for (let i = 0; i < event.results.length; ++i) {
+        const transcriptPart = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final_transcript += transcriptPart;
+        } else {
+          interim_transcript += transcriptPart;
         }
-        
-        const lastResultIsFinal = event.results[event.results.length - 1].isFinal;
-        if (lastResultIsFinal && final_transcript.trim().endsWith('.')) {
-            final_transcript += ' ';
-        }
-        
-        setNotesContent(baseTranscriptRef.current + final_transcript + interim_transcript);
+      }
+      
+      const lastResultIsFinal = event.results[event.results.length - 1].isFinal;
+      if (lastResultIsFinal && final_transcript.trim().endsWith('.')) {
+        final_transcript += ' ';
+      }
+
+      finalTranscriptFromSessionRef.current = final_transcript;
+      setLiveTranscript(final_transcript + interim_transcript);
     };
 
     recognition.start();
@@ -230,8 +234,14 @@ export function SummarizerForm() {
                     onChange={(e) => {
                         setNotesContent(e.target.value);
                     }}
+                    disabled={isTranscribing}
                   />
                 </FormControl>
+                {isTranscribing && (
+                  <div className="mt-2 p-3 border rounded-md bg-muted/50 min-h-[40px] text-sm text-muted-foreground animate-in fade-in-50">
+                    {liveTranscript || 'Listening...'}
+                  </div>
+                )}
                 <FormMessage />
               </FormItem>
             )}
