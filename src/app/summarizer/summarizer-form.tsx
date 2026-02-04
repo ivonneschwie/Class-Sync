@@ -49,7 +49,6 @@ export function SummarizerForm() {
   
   const [isTranscribing, setIsTranscribing] = useState(false);
   const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
-  const initialNotesRef = useRef<string>('');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -142,22 +141,22 @@ export function SummarizerForm() {
       setIsTranscribing(false);
     };
 
-    initialNotesRef.current = form.getValues('notes');
-    
+    const initialNotes = form.getValues('notes');
+    let finalTranscript = '';
+
     recognition.onresult = (event) => {
-      let finalTranscript = '';
       let interimTranscript = '';
       
-      for (const result of event.results) {
-        if (result.isFinal) {
-          finalTranscript += result[0].transcript + ' ';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
         } else {
-          interimTranscript += result[0].transcript;
+          interimTranscript += event.results[i][0].transcript;
         }
       }
-
-      const initialText = initialNotesRef.current ? initialNotesRef.current + ' ' : '';
-      form.setValue('notes', initialText + finalTranscript + interimTranscript, { shouldValidate: true });
+      
+      const separator = initialNotes.length > 0 && !initialNotes.endsWith(' ') ? ' ' : '';
+      form.setValue('notes', initialNotes + separator + finalTranscript + interimTranscript, { shouldValidate: true });
     };
 
     recognition.start();
