@@ -50,9 +50,10 @@ export function SummarizerForm() {
   
   const [isTranscribing, setIsTranscribing] = useState(false);
   const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
-  const lastInterimTranscriptRef = useRef<string>(''); // For robust live editing
-
   const [notesContent, setNotesContent] = useState('');
+  
+  // This ref will hold the transcript content that exists *before* transcription starts.
+  const baseTranscriptRef = useRef<string>('');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -126,14 +127,14 @@ export function SummarizerForm() {
 
     recognition.onstart = () => {
       setIsTranscribing(true);
-      lastInterimTranscriptRef.current = '';
+      // When starting, store whatever is already in the box.
+      baseTranscriptRef.current = notesContent ? notesContent + ' ' : '';
       toast({ title: 'Transcription started...', description: 'Start speaking. Click the stop button when you are done.' });
     };
 
     recognition.onend = () => {
       setIsTranscribing(false);
       recognitionRef.current = null;
-      lastInterimTranscriptRef.current = '';
     };
 
     recognition.onerror = (event) => {
@@ -153,53 +154,28 @@ export function SummarizerForm() {
     };
 
     recognition.onresult = (event) => {
-      let interimTranscript = '';
-      let finalTranscript = '';
+        let interim_transcript = '';
+        let final_transcript = '';
 
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const transcriptPart = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcriptPart;
-        } else {
-          interimTranscript += transcriptPart;
-        }
-      }
-
-      setNotesContent(currentContent => {
-        let baseContent = currentContent;
-        // Remove the previous interim transcript to avoid duplication
-        if (lastInterimTranscriptRef.current && baseContent.endsWith(lastInterimTranscriptRef.current)) {
-            baseContent = baseContent.slice(0, -lastInterimTranscriptRef.current.length);
-        }
-
-        // Process final transcript
-        let newFinalText = finalTranscript;
-        if (newFinalText) {
-            // Add a space before appending if there's content that doesn't end with a space
-            if (baseContent && !baseContent.endsWith(' ')) {
-                newFinalText = ' ' + newFinalText;
-            }
-            // Add a space after a period
-            if (newFinalText.endsWith('.')) {
-                newFinalText += ' ';
-            }
-        }
-
-        // Process interim transcript
-        let newInterimText = interimTranscript;
-        if (newInterimText) {
-            const tempBase = baseContent + newFinalText;
-            // Add a space before appending if there's content that doesn't end with a space
-            if (tempBase && !tempBase.endsWith(' ')) {
-                newInterimText = ' ' + newInterimText;
+        // Iterate through all the results from the beginning of the speech
+        for (let i = 0; i < event.results.length; ++i) {
+            const transcriptPart = event.results[i][0].transcript;
+            // If the result is final, append it to the final transcript
+            if (event.results[i].isFinal) {
+                final_transcript += transcriptPart;
+            } else {
+                // Otherwise, it's part of the interim transcript
+                interim_transcript += transcriptPart;
             }
         }
         
-        // Save the appended interim text to the ref so it can be removed next time
-        lastInterimTranscriptRef.current = newInterimText;
-
-        return baseContent + newFinalText + newInterimText;
-      });
+        // Add a space after a period if it's the end of the final part
+        if (final_transcript.endsWith('.')) {
+            final_transcript += ' ';
+        }
+        
+        // Update the content by combining the base text with the new transcript
+        setNotesContent(baseTranscriptRef.current + final_transcript + interim_transcript);
     };
 
     recognition.start();
@@ -254,7 +230,12 @@ export function SummarizerForm() {
                     className="min-h-[200px] resize-y"
                     {...field}
                     value={notesContent}
-                    onChange={(e) => setNotesContent(e.target.value)}
+                    onChange={(e) => {
+                        setNotesContent(e.target.value);
+                        if (!isTranscribing) {
+                            baseTranscriptRef.current = e.target.value;
+                        }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
