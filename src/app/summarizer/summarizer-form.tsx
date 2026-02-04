@@ -49,13 +49,10 @@ export function SummarizerForm() {
   
   const [isTranscribing, setIsTranscribing] = useState(false);
   const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
-  const [notesContent, setNotesContent] = useState('');
-  
   const [liveTranscript, setLiveTranscript] = useState('');
   
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const liveTextRef = useRef<HTMLSpanElement | null>(null);
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,21 +62,12 @@ export function SummarizerForm() {
     },
   });
 
-  // Sync local state back to the form for validation and submission
-  useEffect(() => {
-    form.setValue('notes', notesContent, { shouldValidate: true });
-  }, [notesContent, form]);
-
   useEffect(() => {
     if (scrollContainerRef.current && liveTextRef.current) {
         const container = scrollContainerRef.current;
         const text = liveTextRef.current;
-
-        const isClient = typeof window !== 'undefined';
-        const isMobile = isClient && window.innerWidth < 768;
-        const scrollThreshold = isMobile ? 0.8 : 0.9;
         
-        const isOverflowing = text.scrollWidth > container.clientWidth * scrollThreshold;
+        const isOverflowing = text.scrollWidth > container.clientWidth * 0.9;
         
         if (isOverflowing) {
             container.scrollLeft = text.scrollWidth;
@@ -149,18 +137,21 @@ export function SummarizerForm() {
 
     recognition.onstart = () => {
       setIsTranscribing(true);
-      setLiveTranscript('');
-      toast({ title: 'Transcription started...', description: 'Start speaking. Click the stop button when you are done.' });
+      setLiveTranscript('Listening...');
+      toast({ title: 'Transcription started...', description: 'Click the stop button when you are done.' });
     };
 
     recognition.onend = () => {
       setIsTranscribing(false);
       
-      const textToAppend = (finalTranscriptForSession.trim() ? finalTranscriptForSession.trim() + ' ' : '');
+      const currentNotes = form.getValues('notes');
+      const formattedTranscript = finalTranscriptForSession.trim().replace(/\.([^ \n])/g, '. $1');
+      
+      if (formattedTranscript) {
+          const newNotes = (currentNotes.trim() ? currentNotes.trim() + ' ' : '') + formattedTranscript + ' ';
+          form.setValue('notes', newNotes, { shouldValidate: true, shouldDirty: true });
+      }
 
-      setNotesContent(prev => 
-        (prev.trim() ? prev.trim() + ' ' : '') + textToAppend
-      );
       setLiveTranscript('');
       recognitionRef.current = null;
     };
@@ -183,18 +174,18 @@ export function SummarizerForm() {
 
     recognition.onresult = (event) => {
       let interimTranscript = '';
-      let finalTranscript = '';
+      finalTranscriptForSession = ''; // Reset and rebuild from the full results list
       
       for (let i = 0; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+          finalTranscriptForSession += event.results[i][0].transcript;
         } else {
           interimTranscript += event.results[i][0].transcript;
         }
       }
       
-      finalTranscriptForSession = finalTranscript.replace(/\.([^ \n])/g, '. $1');
-      setLiveTranscript(finalTranscriptForSession + interimTranscript);
+      const liveDisplay = (finalTranscriptForSession + interimTranscript);
+      setLiveTranscript(liveDisplay || 'Listening...');
     };
 
     recognition.start();
@@ -248,10 +239,6 @@ export function SummarizerForm() {
                     placeholder="Paste your notes here, or use the microphone for live transcription..."
                     className="min-h-[200px] resize-y"
                     {...field}
-                    value={notesContent}
-                    onChange={(e) => {
-                        setNotesContent(e.target.value);
-                    }}
                     disabled={isTranscribing}
                   />
                 </FormControl>
@@ -262,7 +249,7 @@ export function SummarizerForm() {
                       className="no-scrollbar overflow-x-auto"
                     >
                       <span className="whitespace-nowrap text-slate-100" ref={liveTextRef}>
-                        {liveTranscript || 'Listening...'}
+                        {liveTranscript}
                       </span>
                     </div>
                   </div>
