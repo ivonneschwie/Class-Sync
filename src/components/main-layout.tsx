@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Calendar, Bot, Menu, LayoutGrid, BookOpen, Layers, LogOut, Loader2, User as UserIcon, Settings, ChevronsUpDown } from 'lucide-react';
@@ -138,11 +138,12 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
 }
 
 function MobileHeader({ pathname }: { pathname: string }) {
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
     const visibleNavItems = navItems.filter(item => !['/profile', '/settings'].includes(item.href));
 
     return (
         <header className="sticky top-0 z-[11] flex h-14 items-center gap-4 border-b bg-card px-4 md:hidden">
-        <Sheet>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="shrink-0">
                 <Menu className="h-5 w-5" />
@@ -166,6 +167,7 @@ function MobileHeader({ pathname }: { pathname: string }) {
                 <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setIsSheetOpen(false)}
                     className={cn(
                     "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground",
                     pathname === item.href && "bg-muted text-foreground"
@@ -177,7 +179,7 @@ function MobileHeader({ pathname }: { pathname: string }) {
                 ))}
             </nav>
                 <div className="mt-auto p-4">
-                    <AccountDropdown mobile />
+                    <AccountDropdown mobile setIsSheetOpen={setIsSheetOpen} />
                 </div>
             </SheetContent>
         </Sheet>
@@ -191,7 +193,7 @@ function MobileHeader({ pathname }: { pathname: string }) {
 }
 
 
-function AccountDropdown({ mobile }: { mobile?: boolean }) {
+function AccountDropdown({ mobile, setIsSheetOpen }: { mobile?: boolean, setIsSheetOpen?: (open: boolean) => void }) {
   const auth = useAuth();
   const { user } = useUser();
   const { profile, isLoading } = useProfile();
@@ -209,14 +211,20 @@ function AccountDropdown({ mobile }: { mobile?: boolean }) {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   }
 
+  const handleItemClick = () => {
+    if (setIsSheetOpen) {
+      setIsSheetOpen(false);
+    }
+  };
+
   const dropdownContent = (
-    <DropdownMenuContent className={cn("mb-2", mobile ? "w-[calc(100vw-2rem)]" : "w-[245px]")} side={mobile ? 'bottom' : 'top'} align="end">
+    <DropdownMenuContent className={cn("mb-2", "w-[245px]")} side={mobile ? 'bottom' : 'top'} align="end">
         <DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <Link href="/profile"><DropdownMenuItem><UserIcon className="mr-2 h-4 w-4" />Profile</DropdownMenuItem></Link>
-        <Link href="/settings"><DropdownMenuItem><Settings className="mr-2 h-4 w-4" />Settings</DropdownMenuItem></Link>
+        <Link href="/profile"><DropdownMenuItem onClick={handleItemClick}><UserIcon className="mr-2 h-4 w-4" />Profile</DropdownMenuItem></Link>
+        <Link href="/settings"><DropdownMenuItem onClick={handleItemClick}><Settings className="mr-2 h-4 w-4" />Settings</DropdownMenuItem></Link>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => auth.signOut()}><LogOut className="mr-2 h-4 w-4" />Sign Out</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => { auth.signOut(); handleItemClick(); }}><LogOut className="mr-2 h-4 w-4" />Sign Out</DropdownMenuItem>
     </DropdownMenuContent>
   );
 
