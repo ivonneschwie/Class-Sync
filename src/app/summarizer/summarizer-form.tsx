@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -53,7 +52,8 @@ export function SummarizerForm() {
   const [notesContent, setNotesContent] = useState('');
   
   const [liveTranscript, setLiveTranscript] = useState('');
-  const finalTranscriptFromSessionRef = useRef('');
+  
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,6 +67,13 @@ export function SummarizerForm() {
   useEffect(() => {
     form.setValue('notes', notesContent, { shouldValidate: true });
   }, [notesContent, form]);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
+    }
+  }, [liveTranscript]);
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -125,17 +132,18 @@ export function SummarizerForm() {
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
+    let finalTranscript = '';
+
     recognition.onstart = () => {
       setIsTranscribing(true);
       setLiveTranscript('');
-      finalTranscriptFromSessionRef.current = '';
       toast({ title: 'Transcription started...', description: 'Start speaking. Click the stop button when you are done.' });
     };
 
     recognition.onend = () => {
       setIsTranscribing(false);
       setNotesContent(prev => 
-        (prev.trim() ? prev.trim() + ' ' : '') + finalTranscriptFromSessionRef.current.trim()
+        (prev.trim() ? prev.trim() + ' ' : '') + finalTranscript.trim()
       );
       setLiveTranscript('');
       recognitionRef.current = null;
@@ -158,23 +166,18 @@ export function SummarizerForm() {
     };
 
     recognition.onresult = (event) => {
-      let interim_transcript = '';
-      finalTranscriptFromSessionRef.current = '';
+      let interimTranscript = '';
+      finalTranscript = '';
 
       for (let i = 0; i < event.results.length; ++i) {
-        const transcriptPart = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscriptFromSessionRef.current += transcriptPart;
-          // Add a space after a period if it's the end of a final transcript part
-          if (finalTranscriptFromSessionRef.current.trim().endsWith('.')) {
-              finalTranscriptFromSessionRef.current += ' ';
-          }
+          finalTranscript += event.results[i][0].transcript;
         } else {
-          interim_transcript += transcriptPart;
+          interimTranscript += event.results[i][0].transcript;
         }
       }
       
-      setLiveTranscript(finalTranscriptFromSessionRef.current + interim_transcript);
+      setLiveTranscript(finalTranscript + interimTranscript);
     };
 
     recognition.start();
@@ -236,15 +239,12 @@ export function SummarizerForm() {
                   />
                 </FormControl>
                 {isTranscribing && (
-                  <div className="mt-2 rounded-md bg-muted/50 text-lg font-headline animate-in fade-in-50 overflow-hidden">
+                  <div className="mt-2 rounded-md bg-accent/90 font-headline text-lg animate-in fade-in-50 overflow-hidden shadow-[0_0_15px_2px_hsl(var(--accent)/0.6)]">
                     <div
+                      ref={scrollContainerRef}
                       className="px-4 py-3 no-scrollbar overflow-x-auto"
-                      style={{
-                        textShadow:
-                          '0 0 5px hsl(var(--primary) / 0.4), 0 0 10px hsl(var(--accent) / 0.4)',
-                      }}
                     >
-                      <span className="whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                      <span className="whitespace-nowrap text-slate-100">
                         {liveTranscript || 'Listening...'}
                       </span>
                     </div>
