@@ -145,7 +145,7 @@ export function SummarizerForm() {
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
-    let finalTranscript = '';
+    let finalTranscriptForSession = '';
 
     recognition.onstart = () => {
       setIsTranscribing(true);
@@ -156,7 +156,7 @@ export function SummarizerForm() {
     recognition.onend = () => {
       setIsTranscribing(false);
       
-      const textToAppend = (finalTranscript.trim() ? finalTranscript.trim() + ' ' : '');
+      const textToAppend = (finalTranscriptForSession.trim() ? finalTranscriptForSession.trim() + ' ' : '');
 
       setNotesContent(prev => 
         (prev.trim() ? prev.trim() + ' ' : '') + textToAppend
@@ -183,19 +183,18 @@ export function SummarizerForm() {
 
     recognition.onresult = (event) => {
       let interimTranscript = '';
+      let finalTranscript = '';
       
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
+      for (let i = 0; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
-           if (finalTranscript.endsWith('.')) {
-              finalTranscript += ' ';
-          }
         } else {
           interimTranscript += event.results[i][0].transcript;
         }
       }
       
-      setLiveTranscript(finalTranscript + interimTranscript);
+      finalTranscriptForSession = finalTranscript.replace(/\.([^ \n])/g, '. $1');
+      setLiveTranscript(finalTranscriptForSession + interimTranscript);
     };
 
     recognition.start();
