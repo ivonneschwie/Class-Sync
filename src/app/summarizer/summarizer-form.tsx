@@ -118,7 +118,7 @@ export function SummarizerForm() {
 
     recognition.onstart = () => {
       setIsTranscribing(true);
-      toast({ title: 'Transcription started...', description: 'Start speaking. Click the square icon to stop.' });
+      toast({ title: 'Transcription started...', description: 'Start speaking. Click the stop button when you are done.' });
     };
 
     recognition.onend = () => {
@@ -206,39 +206,47 @@ export function SummarizerForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Notes</FormLabel>
-                <div className="relative">
-                  <FormControl>
-                    <Textarea
-                      placeholder="Paste your notes here, or use the microphone for live transcription..."
-                      className="min-h-[200px] resize-y pr-12"
-                      {...field}
-                    />
-                  </FormControl>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="icon"
-                    className="absolute right-2 top-2"
-                    onClick={handleToggleTranscription}
-                  >
-                    {isTranscribing ? <Square className="h-5 w-5 text-red-500 fill-current" /> : <Mic className="h-5 w-5" />}
-                    <span className="sr-only">{isTranscribing ? 'Stop transcription' : 'Start transcription'}</span>
-                  </Button>
-                </div>
+                <FormControl>
+                  <Textarea
+                    placeholder="Paste your notes here, or use the microphone for live transcription..."
+                    className="min-h-[200px] resize-y"
+                    {...field}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={isLoading || isTranscribing} className="w-full sm:w-auto">
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Summarizing...
-              </>
-            ) : (
-              'Summarize Notes'
-            )}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleToggleTranscription}
+              disabled={isLoading}
+            >
+              {isTranscribing ? (
+                <>
+                  <Square className="mr-2 h-4 w-4 text-red-500 fill-current" />
+                  Stop Transcription
+                </>
+              ) : (
+                <>
+                  <Mic className="mr-2 h-4 w-4" />
+                  Start Transcription
+                </>
+              )}
+            </Button>
+            <Button type="submit" disabled={isLoading || isTranscribing}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Summarizing...
+                </>
+              ) : (
+                'Summarize Notes'
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
 
