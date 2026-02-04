@@ -28,15 +28,10 @@ type SummaryOutput = {
 };
 
 // For Web Speech API, which might not be fully typed in all environments
-interface CustomSpeechRecognition extends SpeechRecognition {
-  continuous: boolean;
-  interimResults: boolean;
-}
-
 declare global {
   interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
+    SpeechRecognition: any; // Use `any` to avoid type conflicts with different browser implementations
+    webkitSpeechRecognition: any;
   }
 }
 
@@ -48,12 +43,9 @@ export function SummarizerForm() {
   const { classes } = useClasses();
   
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
   const [liveTranscript, setLiveTranscript] = useState('');
-  // This ref will hold the final transcript for the current session.
-  // It's built up in onresult and used once in onend.
-  const finalTranscriptForSessionRef = useRef('');
   
+  const recognitionRef = useRef<any | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const liveTextRef = useRef<HTMLSpanElement | null>(null);
 
@@ -65,13 +57,13 @@ export function SummarizerForm() {
     },
   });
 
+  // Effect for auto-scrolling the live transcript view
   useEffect(() => {
     if (scrollContainerRef.current && liveTextRef.current) {
         const container = scrollContainerRef.current;
         const text = liveTextRef.current;
         
-        // Use 90% of the container width as the trigger point
-        const scrollThreshold = container.clientWidth * 0.9;
+        const scrollThreshold = container.clientWidth * 0.90; // 90%
         const isOverflowing = text.scrollWidth > scrollThreshold;
         
         if (isOverflowing) {
@@ -113,7 +105,8 @@ export function SummarizerForm() {
       setIsLoading(false);
     }
   }
-  
+
+  // Completely refactored transcription logic from scratch
   const handleToggleTranscription = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -128,18 +121,19 @@ export function SummarizerForm() {
 
     if (isTranscribing) {
       recognitionRef.current?.stop();
+      // onend will handle the cleanup and state changes
       return;
     }
 
-    const recognition = new SpeechRecognition() as CustomSpeechRecognition;
+    // --- Start new transcription session ---
+    const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
 
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
-    // Reset the final transcript for the new session
-    finalTranscriptForSessionRef.current = '';
+    let finalTranscript = ''; // This variable will live only inside this function's scope for this session
 
     recognition.onstart = () => {
       setIsTranscribing(true);
@@ -149,20 +143,18 @@ export function SummarizerForm() {
 
     recognition.onend = () => {
       setIsTranscribing(false);
-      
-      const currentNotes = form.getValues('notes');
-      const formattedTranscript = finalTranscriptForSessionRef.current.trim().replace(/\.([^ \n])/g, '. $1');
-      
-      if (formattedTranscript) {
-          const newNotes = (currentNotes.trim() ? currentNotes.trim() + ' ' : '') + formattedTranscript + ' ';
+      setLiveTranscript('');
+      recognitionRef.current = null; // Clean up the instance
+
+      if (finalTranscript.trim()) {
+          const currentNotes = form.getValues('notes');
+          // Add a space if there's existing text, then add the new transcript.
+          const newNotes = (currentNotes.trim() ? currentNotes.trim() + ' ' : '') + finalTranscript.trim().replace(/\.([^ \n])/g, '. $1') + ' ';
           form.setValue('notes', newNotes, { shouldValidate: true, shouldDirty: true });
       }
-
-      setLiveTranscript('');
-      recognitionRef.current = null;
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: any) => {
       console.error('Speech recognition error', event.error);
        let errorMsg = `An error occurred: ${event.error}`;
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
@@ -175,14 +167,19 @@ export function SummarizerForm() {
         title: 'Transcription Error',
         description: errorMsg,
       });
+      
+      // Also trigger onend cleanup logic
       setIsTranscribing(false);
+      setLiveTranscript('');
+      recognitionRef.current = null;
     };
 
-    recognition.onresult = (event) => {
-      // Rebuild the transcript from scratch on every result to prevent duplication.
+    recognition.onresult = (event: any) => {
       let interimTranscript = '';
-      let finalTranscript = '';
-      
+      // Reset finalTranscript for this session on each event and rebuild it
+      // This is the key to preventing duplication. We trust the event.results as the source of truth.
+      finalTranscript = ''; 
+
       for (let i = 0; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
@@ -191,13 +188,13 @@ export function SummarizerForm() {
         }
       }
       
-      finalTranscriptForSessionRef.current = finalTranscript;
-      const liveDisplay = (finalTranscript + interimTranscript);
-      setLiveTranscript(liveDisplay || 'Listening...');
+      // Update the live display
+      setLiveTranscript(finalTranscript + interimTranscript || 'Listening...');
     };
 
     recognition.start();
   };
+
 
   // Cleanup on unmount
   useEffect(() => {
