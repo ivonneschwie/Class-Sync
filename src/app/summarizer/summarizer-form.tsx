@@ -142,8 +142,11 @@ export function SummarizerForm() {
 
     recognition.onend = () => {
       setIsTranscribing(false);
+      
+      const textToAppend = (finalTranscript.trim() ? finalTranscript.trim() + ' ' : '');
+
       setNotesContent(prev => 
-        (prev.trim() ? prev.trim() + ' ' : '') + finalTranscript.trim()
+        (prev.trim() ? prev.trim() + ' ' : '') + textToAppend
       );
       setLiveTranscript('');
       recognitionRef.current = null;
@@ -172,6 +175,12 @@ export function SummarizerForm() {
       for (let i = 0; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
+          if (!finalTranscript.endsWith(' ') && !finalTranscript.endsWith('.')) {
+              finalTranscript += ' ';
+          }
+          if (finalTranscript.endsWith('.')) {
+              finalTranscript += ' ';
+          }
         } else {
           interimTranscript += event.results[i][0].transcript;
         }
@@ -239,10 +248,10 @@ export function SummarizerForm() {
                   />
                 </FormControl>
                 {isTranscribing && (
-                  <div className="mt-2 rounded-md bg-accent/90 font-headline text-lg animate-in fade-in-50 overflow-hidden shadow-[0_0_15px_2px_hsl(var(--accent)/0.6)]">
+                  <div className="mt-2 rounded-md bg-[hsl(154,50%,30%)] font-headline text-lg animate-in fade-in-50 overflow-hidden shadow-[0_0_15px_2px_hsl(154,50%,30%/0.8)] px-4 py-3">
                     <div
                       ref={scrollContainerRef}
-                      className="px-4 py-3 no-scrollbar overflow-x-auto"
+                      className="no-scrollbar overflow-x-auto max-w-[80%] md:max-w-[60%]"
                     >
                       <span className="whitespace-nowrap text-slate-100">
                         {liveTranscript || 'Listening...'}
