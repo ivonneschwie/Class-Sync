@@ -54,6 +54,8 @@ export function SummarizerForm() {
   const [liveTranscript, setLiveTranscript] = useState('');
   
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const liveTextRef = useRef<HTMLSpanElement | null>(null);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,8 +71,19 @@ export function SummarizerForm() {
   }, [notesContent, form]);
 
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
+    if (scrollContainerRef.current && liveTextRef.current) {
+        const container = scrollContainerRef.current;
+        const text = liveTextRef.current;
+
+        const isClient = typeof window !== 'undefined';
+        const isMobile = isClient && window.innerWidth < 768;
+        const scrollThreshold = isMobile ? 0.8 : 0.9;
+        
+        const isOverflowing = text.scrollWidth > container.clientWidth * scrollThreshold;
+        
+        if (isOverflowing) {
+            container.scrollLeft = text.scrollWidth;
+        }
     }
   }, [liveTranscript]);
 
@@ -170,15 +183,11 @@ export function SummarizerForm() {
 
     recognition.onresult = (event) => {
       let interimTranscript = '';
-      finalTranscript = '';
-
-      for (let i = 0; i < event.results.length; ++i) {
+      
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
-          if (!finalTranscript.endsWith(' ') && !finalTranscript.endsWith('.')) {
-              finalTranscript += ' ';
-          }
-          if (finalTranscript.endsWith('.')) {
+           if (finalTranscript.endsWith('.')) {
               finalTranscript += ' ';
           }
         } else {
@@ -251,9 +260,9 @@ export function SummarizerForm() {
                   <div className="mt-2 rounded-md bg-[hsl(154,50%,55%)] font-headline text-lg animate-in fade-in-50 overflow-hidden px-6 py-4 animation-pulse-glow">
                     <div
                       ref={scrollContainerRef}
-                      className="no-scrollbar overflow-x-auto max-w-[90%]"
+                      className="no-scrollbar overflow-x-auto"
                     >
-                      <span className="whitespace-nowrap text-slate-100">
+                      <span className="whitespace-nowrap text-slate-100" ref={liveTextRef}>
                         {liveTranscript || 'Listening...'}
                       </span>
                     </div>
