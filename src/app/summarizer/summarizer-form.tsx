@@ -141,9 +141,8 @@ export function SummarizerForm() {
       setIsTranscribing(false);
     };
 
-    const initialNotes = form.getValues('notes');
-    let finalTranscript = '';
-
+    let finalTranscript = form.getValues('notes');
+    
     recognition.onresult = (event) => {
       let interimTranscript = '';
       
@@ -155,8 +154,8 @@ export function SummarizerForm() {
         }
       }
       
-      const separator = initialNotes.length > 0 && !initialNotes.endsWith(' ') ? ' ' : '';
-      form.setValue('notes', initialNotes + separator + finalTranscript + interimTranscript, { shouldValidate: true });
+      const separator = finalTranscript.length > 0 && !finalTranscript.endsWith(' ') ? ' ' : '';
+      form.setValue('notes', finalTranscript + separator + interimTranscript, { shouldValidate: true });
     };
 
     recognition.start();
