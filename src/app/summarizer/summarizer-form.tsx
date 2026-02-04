@@ -50,6 +50,9 @@ export function SummarizerForm() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
   const [liveTranscript, setLiveTranscript] = useState('');
+  // This ref will hold the final transcript for the current session.
+  // It's built up in onresult and used once in onend.
+  const finalTranscriptForSessionRef = useRef('');
   
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const liveTextRef = useRef<HTMLSpanElement | null>(null);
@@ -67,7 +70,9 @@ export function SummarizerForm() {
         const container = scrollContainerRef.current;
         const text = liveTextRef.current;
         
-        const isOverflowing = text.scrollWidth > container.clientWidth * 0.9;
+        // Use 90% of the container width as the trigger point
+        const scrollThreshold = container.clientWidth * 0.9;
+        const isOverflowing = text.scrollWidth > scrollThreshold;
         
         if (isOverflowing) {
             container.scrollLeft = text.scrollWidth;
@@ -133,7 +138,8 @@ export function SummarizerForm() {
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
-    let finalTranscriptForSession = '';
+    // Reset the final transcript for the new session
+    finalTranscriptForSessionRef.current = '';
 
     recognition.onstart = () => {
       setIsTranscribing(true);
@@ -145,7 +151,7 @@ export function SummarizerForm() {
       setIsTranscribing(false);
       
       const currentNotes = form.getValues('notes');
-      const formattedTranscript = finalTranscriptForSession.trim().replace(/\.([^ \n])/g, '. $1');
+      const formattedTranscript = finalTranscriptForSessionRef.current.trim().replace(/\.([^ \n])/g, '. $1');
       
       if (formattedTranscript) {
           const newNotes = (currentNotes.trim() ? currentNotes.trim() + ' ' : '') + formattedTranscript + ' ';
@@ -173,18 +179,20 @@ export function SummarizerForm() {
     };
 
     recognition.onresult = (event) => {
+      // Rebuild the transcript from scratch on every result to prevent duplication.
       let interimTranscript = '';
-      finalTranscriptForSession = ''; // Reset and rebuild from the full results list
+      let finalTranscript = '';
       
       for (let i = 0; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscriptForSession += event.results[i][0].transcript;
+          finalTranscript += event.results[i][0].transcript;
         } else {
           interimTranscript += event.results[i][0].transcript;
         }
       }
       
-      const liveDisplay = (finalTranscriptForSession + interimTranscript);
+      finalTranscriptForSessionRef.current = finalTranscript;
+      const liveDisplay = (finalTranscript + interimTranscript);
       setLiveTranscript(liveDisplay || 'Listening...');
     };
 
