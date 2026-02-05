@@ -29,6 +29,16 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    
+    /* Sidebar */
+    --sidebar-background: 240 5% 98%;
+    --sidebar-foreground: 240 6% 10%;
+    --sidebar-border: 240 6% 88%;
+    --sidebar-accent: 240 5% 92%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-primary: 250 80% 70%;
+    --sidebar-primary-foreground: 240 6% 10%;
+    --sidebar-ring: 250 80% 70%;
   }
   .dark {
     --background: 0 0% 4%;
@@ -55,6 +65,16 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 14.9%;
+    --sidebar-accent: 0 0% 14.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-primary: 250 80% 70%;
+    --sidebar-primary-foreground: 240 6% 10%;
+    --sidebar-ring: 250 80% 70%;
   }
 
   /* Blue Theme */
