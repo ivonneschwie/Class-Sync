@@ -15,8 +15,8 @@ export function ThemeToggle() {
 
   const colorThemes = [
     { name: 'default', label: 'Default', color: 'hsl(242 80% 70%)' },
-    { name: 'green', label: 'Green', color: 'hsl(142 76% 36%)' },
     { name: 'blue', label: 'Blue', color: 'hsl(221 83% 53%)' },
+    { name: 'green', label: 'Green', color: 'hsl(142 76% 36%)' },
     { name: 'orange', label: 'Orange', color: 'hsl(25 95% 53%)' },
   ] as const;
 
