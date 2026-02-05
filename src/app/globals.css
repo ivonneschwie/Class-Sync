@@ -59,10 +59,10 @@
 
   /* Blue Theme */
   .theme-blue {
-    --background: 220 80% 96%;
+    --background: 220 85% 94%;
     --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
-    --accent: 210 40% 94%;
+    --accent: 210 60% 92%;
     --accent-foreground: 222 47% 11%;
     --ring: 221 83% 53%;
     --chart-1: 221 83% 53%;
