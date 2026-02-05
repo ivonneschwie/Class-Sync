@@ -12,11 +12,11 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Card className="max-w-md">
+      <Card className="max-w-lg">
         <CardHeader>
             <CardTitle className="font-headline">Appearance</CardTitle>
             <CardDescription>
-                Adjust the look and feel of the interface.
+                Adjust the base theme and accent color of the interface.
             </CardDescription>
         </CardHeader>
         <CardContent>

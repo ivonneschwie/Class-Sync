@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Providers } from '@/components/providers';
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ColorThemeProvider } from '@/components/color-theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -29,12 +30,14 @@ export default function RootLayout({
             attribute="class"
             defaultTheme="system"
             enableSystem
-            disableTransitionOnChange
+            disableTransitionOnChange={false}
           >
-            <Providers>
-              <MainLayout>{children}</MainLayout>
-              <Toaster />
-            </Providers>
+            <ColorThemeProvider>
+              <Providers>
+                <MainLayout>{children}</MainLayout>
+                <Toaster />
+              </Providers>
+            </ColorThemeProvider>
           </ThemeProvider>
         </FirebaseClientProvider>
       </body>
