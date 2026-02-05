@@ -101,8 +101,8 @@
     --chart-5: 142 36% 75%;
   }
   .dark.theme-green {
-    --background: 142 40% 10%;
-    --card: 142 40% 12%;
+    --background: 142 40% 8%;
+    --card: 142 40% 10%;
     --primary: 142 71% 45%;
     --primary-foreground: 142 71% 95%;
     --accent: 142 71% 55%;
@@ -130,8 +130,8 @@
     --chart-5: 25 55% 93%;
   }
   .dark.theme-orange {
-    --background: 30 50% 10%;
-    --card: 30 50% 12%;
+    --background: 30 50% 8%;
+    --card: 30 50% 10%;
     --primary: 35 91% 55%;
     --primary-foreground: 35 91% 95%;
     --accent: 35 91% 65%;
