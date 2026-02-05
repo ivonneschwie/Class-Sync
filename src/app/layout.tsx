@@ -27,7 +27,8 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="light"
+            defaultTheme="system"
+            enableSystem
             disableTransitionOnChange
           >
             <Providers>
