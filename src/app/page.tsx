@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -11,7 +10,6 @@ import type { Class } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { ClassCard } from '@/components/class-card';
 import { useClasses } from '@/context/classes-context';
-import { RedeemCodeDialog } from '@/components/redeem-code-dialog';
 
 export default function SchedulePage() {
   const { classes, addClass } = useClasses();
@@ -64,7 +62,6 @@ export default function SchedulePage() {
             <p className="text-muted-foreground">Your weekly class overview.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <RedeemCodeDialog />
             <Button onClick={() => setIsAddDialogOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Class

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -85,7 +84,7 @@ export function RedeemCodeDialog() {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Hash className="mr-2 h-4 w-4" />
-          Join by Code
+          Import Shared Content
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
