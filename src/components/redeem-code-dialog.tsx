@@ -84,7 +84,7 @@ export function RedeemCodeDialog() {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Hash className="mr-2 h-4 w-4" />
-          Redeem Code
+          Import
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
