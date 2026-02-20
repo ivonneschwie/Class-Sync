@@ -51,18 +51,18 @@ export default function FlashcardsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-            <h1 className="text-3xl font-bold font-headline">My Decks</h1>
-            <p className="text-muted-foreground pr-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+            <h1 className="text-3xl font-bold font-headline tracking-tight">My Decks</h1>
+            <p className="text-muted-foreground">
             Review your saved decks or create a new one.
             </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
             <RedeemCodeDialog expectedType="deck" />
             <Dialog open={createDeckOpen} onOpenChange={setCreateDeckOpen}>
                 <DialogTrigger asChild>
-                    <Button>
+                    <Button className="w-full sm:w-auto">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Create New Deck
                     </Button>
