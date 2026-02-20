@@ -108,10 +108,11 @@
       "properties": {
         "type": { "type": "string", "enum": ["summary", "deck"] },
         "data": { "type": "object" },
+        "originalId": { "type": "string", "description": "The ID of the original document that was shared to prevent duplicates." },
         "createdBy": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["type", "data", "createdBy", "createdAt"]
+      "required": ["type", "data", "originalId", "createdBy", "createdAt"]
     }
   },
   "auth": {

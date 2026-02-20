@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, limit, serverTimestamp } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { cn } from '@/lib/utils';
 
@@ -41,14 +41,37 @@ export function ShareButton({ type, data, className }: ShareButtonProps) {
     setIsLoading(true);
 
     try {
-      // Stripping user specific IDs for the shared item
-      const { id, userId, createdAt, ...payload } = data;
+      // 1. Check if this user has already shared this specific item
+      const q = query(
+        collection(firestore, 'shares'),
+        where('createdBy', '==', user.uid),
+        where('originalId', '==', data.id),
+        where('type', '==', type),
+        limit(1)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        // Reuse existing share code
+        const existingShare = querySnapshot.docs[0];
+        setShareCode(existingShare.id);
+        toast({
+          title: "Share Code Restored",
+          description: "Reusing your existing share code for this item.",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. If not found, create a new one
+      const { id: originalId, userId, createdAt, ...payload } = data;
       
       let code = generateCode();
       let exists = true;
       let attempts = 0;
 
-      // Ensure code is unique (simple check)
+      // Ensure code is unique globally
       while (exists && attempts < 5) {
         const shareRef = doc(firestore, 'shares', code);
         const snap = await getDoc(shareRef);
@@ -64,6 +87,7 @@ export function ShareButton({ type, data, className }: ShareButtonProps) {
       setDocumentNonBlocking(shareRef, {
         type,
         data: payload,
+        originalId: data.id,
         createdBy: user.uid,
         createdAt: serverTimestamp(),
       }, { merge: true });
@@ -71,7 +95,7 @@ export function ShareButton({ type, data, className }: ShareButtonProps) {
       setShareCode(code);
       toast({
         title: "Code Generated!",
-        description: "Your share code is ready to use.",
+        description: "Your unique share code is ready to use.",
       });
     } catch (error) {
       console.error('Error sharing:', error);
@@ -96,10 +120,22 @@ export function ShareButton({ type, data, className }: ShareButtonProps) {
     });
   };
 
+  const onOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      // Don't reset shareCode immediately so it persists if they reopen same item
+      // but usually we want a fresh state for DIFFERENT items
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className={cn("gap-2", className)}>
+        <Button variant="outline" size="sm" className={cn("gap-2", className)} onClick={(e) => {
+            // Reset share code if we are opening a different item than what was previously cached
+            // However, since ShareButton is usually unique per item in the list, 
+            // the state is already scoped to that item.
+        }}>
           <Share2 className="h-4 w-4" />
           Share
         </Button>
@@ -138,8 +174,11 @@ export function ShareButton({ type, data, className }: ShareButtonProps) {
                 </Button>
               </div>
               <p className="text-sm text-center text-muted-foreground">
-                Give this code to your classmate. They can use "Join by Code" to import it.
+                Give this code to your classmate. They can use the "Import" button in their Lesson Catalog.
               </p>
+              <Button variant="ghost" className="w-full text-xs" onClick={() => setShareCode(null)}>
+                Generate a different code?
+              </Button>
             </div>
           )}
         </div>

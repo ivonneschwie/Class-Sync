@@ -59,6 +59,7 @@ export type SharedItem = {
   id: string; // The share code
   type: 'summary' | 'deck';
   data: any; // The actual content
+  originalId: string; // The original document ID
   createdBy: string;
   createdAt: Timestamp;
 };
