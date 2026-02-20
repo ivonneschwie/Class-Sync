@@ -119,7 +119,7 @@ export default function FlashcardsPage() {
                 </CardHeader>
                 <CardContent className="flex-grow">
                     <p className="text-sm text-muted-foreground">
-                        Created on {format(deck.createdAt.toDate(), "MMMM d, yyyy")}
+                        Created on {deck.createdAt?.toDate ? format(deck.createdAt.toDate(), "MMMM d, yyyy") : 'Just now'}
                     </p>
                 </CardContent>
                 <CardContent>

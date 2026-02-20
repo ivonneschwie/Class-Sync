@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -212,7 +211,9 @@ export function SummaryHistory() {
                                             </Button>
                                         </div>
                                     </div>
-                                    <p className="text-sm text-muted-foreground pt-1">{format(selectedSummary.createdAt.toDate(), "MMMM d, yyyy")}</p>
+                                    <p className="text-sm text-muted-foreground pt-1">
+                                        {selectedSummary.createdAt?.toDate ? format(selectedSummary.createdAt.toDate(), "MMMM d, yyyy") : 'Just now'}
+                                    </p>
                                 </div>
                                 
                                 <div className="space-y-3">
