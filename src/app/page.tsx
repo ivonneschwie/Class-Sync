@@ -61,7 +61,7 @@ export default function SchedulePage() {
             <h1 className="text-3xl font-bold font-headline tracking-tight">My Schedule</h1>
             <p className="text-muted-foreground">Your weekly class overview.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Class
