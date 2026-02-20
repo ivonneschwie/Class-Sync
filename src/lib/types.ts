@@ -1,3 +1,4 @@
+
 import { Timestamp } from "firebase/firestore";
 
 export type ClassSchedule = {
@@ -51,5 +52,13 @@ export type UserProfile = {
   firstName?: string;
   lastName?: string;
   address?: string;
+  createdAt: Timestamp;
+};
+
+export type SharedItem = {
+  id: string; // The share code
+  type: 'summary' | 'deck';
+  data: any; // The actual content
+  createdBy: string;
   createdAt: Timestamp;
 };

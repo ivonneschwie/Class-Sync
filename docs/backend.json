@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -99,6 +100,18 @@
             "createdAt": { "type": "string", "format": "date-time" }
         },
         "required": ["userId", "name", "subject", "flashcards", "createdAt"]
+    },
+    "SharedItem": {
+      "title": "Shared Item",
+      "type": "object",
+      "description": "Stores a publicly shareable version of a resource.",
+      "properties": {
+        "type": { "type": "string", "enum": ["summary", "deck"] },
+        "data": { "type": "object" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "data", "createdBy", "createdAt"]
     }
   },
   "auth": {
@@ -136,6 +149,14 @@
           "entityName": "FlashcardDeck",
           "schema": { "$ref": "#/entities/FlashcardDeck" },
           "description": "Stores flashcard decks created by a specific user."
+        }
+      },
+      {
+        "path": "/shares/{shareId}",
+        "definition": {
+          "entityName": "SharedItem",
+          "schema": { "$ref": "#/entities/SharedItem" },
+          "description": "Stores shared resources accessible via a short code."
         }
       }
     ]

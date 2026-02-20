@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -12,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ShareButton } from './share-button';
 
 export function SummaryHistory() {
     const { summaries, deleteSummary } = useSummaries();
@@ -194,18 +196,21 @@ export function SummaryHistory() {
                      <ScrollArea className="h-full p-6">
                         {selectedSummary ? (
                             <div className="space-y-8 animate-in fade-in-20">
-                                <div className="border-b pb-2">
-                                    <div className="flex justify-between items-center gap-4">
+                                <div className="border-b pb-4">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                         <h2 className="text-2xl font-bold font-headline">{selectedSummary.title}</h2>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={(e) => handleDeleteClick(e, selectedSummary.id)}
-                                            className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
-                                        >
-                                            <Trash2 className="h-5 w-5" />
-                                            <span className="sr-only">Delete lesson</span>
-                                        </Button>
+                                        <div className="flex items-center gap-2">
+                                            <ShareButton type="summary" data={selectedSummary} />
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => handleDeleteClick(e, selectedSummary.id)}
+                                                className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                                <span className="sr-only">Delete lesson</span>
+                                            </Button>
+                                        </div>
                                     </div>
                                     <p className="text-sm text-muted-foreground pt-1">{format(selectedSummary.createdAt.toDate(), "MMMM d, yyyy")}</p>
                                 </div>
@@ -270,5 +275,3 @@ export function SummaryHistory() {
         </>
     );
 }
-
-    
