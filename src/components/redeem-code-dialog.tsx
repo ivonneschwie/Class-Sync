@@ -13,7 +13,11 @@ import { useDecks } from '@/context/decks-context';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-export function RedeemCodeDialog() {
+interface RedeemCodeDialogProps {
+  expectedType: 'summary' | 'deck';
+}
+
+export function RedeemCodeDialog({ expectedType }: RedeemCodeDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +49,16 @@ export function RedeemCodeDialog() {
           description: 'The code you entered is invalid or has expired.',
         });
       } else {
-        setSharedItem(snap.data());
+        const data = snap.data();
+        if (data.type !== expectedType) {
+          toast({
+            variant: 'destructive',
+            title: 'Invalid Code Type',
+            description: `This code is for a ${data.type === 'summary' ? 'Lesson' : 'Flashcard Deck'}, but you are trying to import it here.`,
+          });
+        } else {
+          setSharedItem(data);
+        }
       }
     } catch (error) {
       console.error('Error looking up code:', error);
@@ -76,6 +89,8 @@ export function RedeemCodeDialog() {
     reset();
   };
 
+  const typeLabel = expectedType === 'summary' ? 'Lesson' : 'Flashcard Deck';
+
   return (
     <Dialog open={isOpen} onOpenChange={(val) => {
         setIsOpen(val);
@@ -89,9 +104,9 @@ export function RedeemCodeDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Redeem Share Code</DialogTitle>
+          <DialogTitle>Import {typeLabel}</DialogTitle>
           <DialogDescription>
-            Enter a 6-digit code to import shared study materials.
+            Enter a 6-digit code to import shared {expectedType === 'summary' ? 'lessons' : 'flashcard decks'}.
           </DialogDescription>
         </DialogHeader>
 

@@ -14,7 +14,7 @@ export default function LessonCatalogPage() {
           </p>
         </div>
         <div>
-          <RedeemCodeDialog />
+          <RedeemCodeDialog expectedType="summary" />
         </div>
       </div>
       <div className="flex-1 min-h-0">

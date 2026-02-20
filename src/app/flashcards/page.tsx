@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -14,7 +13,7 @@ import { FlashcardViewer } from './flashcard-viewer';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ShareButton } from '@/components/share-button';
-
+import { RedeemCodeDialog } from '@/components/redeem-code-dialog';
 
 export default function FlashcardsPage() {
   const [createDeckOpen, setCreateDeckOpen] = useState(false);
@@ -59,25 +58,28 @@ export default function FlashcardsPage() {
             Review your saved decks or create a new one.
             </p>
         </div>
-        <Dialog open={createDeckOpen} onOpenChange={setCreateDeckOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create New Deck
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[640px] max-h-[90vh] flex flex-col">
-                <DialogHeader>
-                    <DialogTitle className="font-headline">Create a New Flashcard Deck</DialogTitle>
-                    <CardDescription>
-                        The AI will create questions and answers based on your selected notes.
-                    </CardDescription>
-                </DialogHeader>
-                <div className="flex-grow overflow-y-auto pr-6 -mr-6">
-                    <FlashcardGenerator onDeckCreated={handleDeckCreated} />
-                </div>
-            </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+            <RedeemCodeDialog expectedType="deck" />
+            <Dialog open={createDeckOpen} onOpenChange={setCreateDeckOpen}>
+                <DialogTrigger asChild>
+                    <Button>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Create New Deck
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[640px] max-h-[90vh] flex flex-col">
+                    <DialogHeader>
+                        <DialogTitle className="font-headline">Create a New Flashcard Deck</DialogTitle>
+                        <CardDescription>
+                            The AI will create questions and answers based on your selected notes.
+                        </CardDescription>
+                    </DialogHeader>
+                    <div className="flex-grow overflow-y-auto pr-6 -mr-6">
+                        <FlashcardGenerator onDeckCreated={handleDeckCreated} />
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
