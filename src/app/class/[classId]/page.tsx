@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -15,6 +14,17 @@ import { AddClassForm } from '@/components/add-class-form';
 import type { Class } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { formatTimeToAMPM } from '@/lib/time-utils';
+
+const dayLabels: Record<string, string> = {
+  'M': 'Monday',
+  'T': 'Tuesday',
+  'W': 'Wednesday',
+  'Th': 'Thursday',
+  'F': 'Friday',
+  'Sa': 'Saturday',
+  'Su': 'Sunday'
+};
 
 export default function ClassDetailsPage() {
   const router = useRouter();
@@ -154,7 +164,7 @@ export default function ClassDetailsPage() {
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                       <div className="flex items-center font-bold text-lg">
                           <Clock className="mr-3 h-5 w-5" style={{ color: classInfo.accentColor }} />
-                          <span>{slot.startTime} - {slot.endTime}</span>
+                          <span>{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
                           <Separator orientation="vertical" className="mx-4 h-6 hidden sm:block" />
                           <div className="flex items-center text-muted-foreground font-medium">
                             <MapPin className="mr-2 h-4 w-4" style={{ color: classInfo.accentColor }} />

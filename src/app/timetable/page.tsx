@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -9,7 +8,7 @@ import { MapPin, CalendarDays, Inbox, Clock, Coffee } from 'lucide-react';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
+import { formatTimeToAMPM } from '@/lib/time-utils';
 
 const orderedDays: ClassSchedule['days'][number][] = ['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'];
 const dayLabels: Record<string, string> = {
@@ -115,7 +114,9 @@ export default function TimetablePage() {
                           <span className="text-sm uppercase tracking-wider">{item.durationMinutes} min break</span>
                         </div>
                         <Separator orientation="vertical" className="h-4 mx-2" />
-                        <span className="text-xs text-muted-foreground">{item.startTime} - {item.endTime}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatTimeToAMPM(item.startTime)} - {formatTimeToAMPM(item.endTime)}
+                        </span>
                       </div>
                     );
                   }
@@ -136,7 +137,9 @@ export default function TimetablePage() {
                           <div className="flex items-center flex-wrap gap-y-2 text-muted-foreground font-semibold">
                             <div className="flex items-center gap-2 pr-4">
                               <Clock className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
-                              <span className="text-base">{classData.currentSchedule.startTime} - {classData.currentSchedule.endTime}</span>
+                              <span className="text-base">
+                                {formatTimeToAMPM(classData.currentSchedule.startTime)} - {formatTimeToAMPM(classData.currentSchedule.endTime)}
+                              </span>
                             </div>
                             
                             <div className="flex items-center gap-2 pl-4 border-l">

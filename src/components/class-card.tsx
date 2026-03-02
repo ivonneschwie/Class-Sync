@@ -1,9 +1,9 @@
-
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, MapPin, Clock } from 'lucide-react';
 import type { Class } from '@/lib/types';
+import { formatTimeToAMPM } from '@/lib/time-utils';
 
 type ClassCardProps = {
   classInfo: Class;
@@ -33,7 +33,7 @@ export function ClassCard({ classInfo }: ClassCardProps) {
                       <div className="flex items-center font-semibold gap-2 overflow-hidden">
                           <div className="flex items-center shrink-0">
                               <Clock className="mr-1.5 h-4 w-4" style={{ color: classInfo.accentColor }} />
-                              <span>{slot.startTime} - {slot.endTime}</span>
+                              <span>{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
                           </div>
                           {slot.location && (
                               <div className="flex items-center text-[11px] text-muted-foreground font-normal border-l border-muted-foreground/30 pl-2 shrink overflow-hidden">
