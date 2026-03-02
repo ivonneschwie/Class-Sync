@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Class } from '@/lib/types';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, MapPin } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +20,7 @@ const scheduleSchema = z.object({
   days: z.array(z.enum(daysOfWeek)).min(1, "Select at least one day."),
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)."),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)."),
+  location: z.string().min(2, "Room/Building must be at least 2 characters."),
 }).refine((data) => data.startTime < data.endTime, {
   message: "End time must be after start time.",
   path: ["endTime"],
@@ -28,7 +30,6 @@ const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   code: z.string().min(2, "Code must be at least 2 characters."),
   instructor: z.string().min(2, "Instructor name must be at least 2 characters."),
-  location: z.string().min(2, "Location must be at least 2 characters."),
   description: z.string().optional(),
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a valid hex color."),
   schedule: z.array(scheduleSchema).min(1, "Please add at least one time slot."),
@@ -46,10 +47,9 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
       name: '',
       code: '',
       instructor: '',
-      location: '',
       description: '',
       accentColor: '#8B5CF6',
-      schedule: [{ days: [], startTime: '', endTime: '' }],
+      schedule: [{ days: [], startTime: '', endTime: '', location: '' }],
     },
   });
 
@@ -64,13 +64,13 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
         name: classToEdit.name,
         code: classToEdit.code,
         instructor: classToEdit.instructor,
-        location: classToEdit.location,
         description: classToEdit.description || '',
         accentColor: classToEdit.accentColor,
         schedule: classToEdit.schedule.map(s => ({
           days: [...s.days] as ('M' | 'T' | 'W' | 'Th' | 'F' | 'Sa' | 'Su')[],
           startTime: s.startTime,
-          endTime: s.endTime
+          endTime: s.endTime,
+          location: s.location || ''
         }))
       });
     } else {
@@ -78,10 +78,9 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
             name: '',
             code: '',
             instructor: '',
-            location: '',
             description: '',
             accentColor: '#8B5CF6',
-            schedule: [{ days: [], startTime: '', endTime: '' }],
+            schedule: [{ days: [], startTime: '', endTime: '', location: '' }],
         });
     }
   }, [classToEdit, form]);
@@ -137,20 +136,7 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                 )}
             />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Healy Hall, Room 203" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
+            <div className="grid grid-cols-1 gap-4">
                  <FormField
                     control={form.control}
                     name="accentColor"
@@ -161,11 +147,11 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                             <div className="relative flex items-center">
                                 <Input type="text" {...field} className="pr-12"/>
                                 <div className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10">
-                                    <Input 
+                                    <input 
                                       type="color" 
                                       value={field.value} 
                                       onChange={e => field.onChange(e.target.value)} 
-                                      className="w-full h-full p-1 border-0 cursor-pointer bg-transparent"
+                                      className="w-full h-full p-1 border-0 cursor-pointer bg-transparent rounded-md"
                                     />
                                 </div>
                             </div>
@@ -197,13 +183,13 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
         <Separator />
 
         <div className="space-y-4">
-            <FormLabel>Schedule</FormLabel>
+            <FormLabel>Schedule & Locations</FormLabel>
             {form.formState.errors.schedule?.root && <FormMessage className='text-sm text-destructive'>{form.formState.errors.schedule.root.message}</FormMessage>}
             <div className="space-y-4">
                 {fields.map((field, index) => (
                     <div key={field.id} className="p-4 border rounded-lg space-y-4 relative bg-muted/50">
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Time Slot #{index + 1}</span>
+                            <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Session #{index + 1}</span>
                             {fields.length > 1 && (
                                 <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => remove(index)}>
                                     <Trash2 className="h-4 w-4" />
@@ -217,7 +203,7 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                             render={({ field: daysField }) => (
                                 <FormItem>
                                 <FormLabel>Days</FormLabel>
-                                <div className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
+                                <div className="flex flex-wrap gap-x-4 gap-y-2 pt-1">
                                     {daysOfWeek.map((day) => (
                                         <div key={day} className="flex items-center space-x-2">
                                             <Checkbox
@@ -269,6 +255,23 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                                 )}
                             />
                         </div>
+
+                        <FormField
+                            control={form.control}
+                            name={`schedule.${index}.location`}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Room / Building</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="e.g., Healy Hall, Room 203" className="pl-9" {...field} />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
                 ))}
             </div>
@@ -276,10 +279,10 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={() => append({ days: [], startTime: '', endTime: '' })}
+                onClick={() => append({ days: [], startTime: '', endTime: '', location: '' })}
             >
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Add Another Time Slot
+                Add Another Session
             </Button>
         </div>
 

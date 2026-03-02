@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -141,11 +142,6 @@ export default function ClassDetailsPage() {
             <span className="font-semibold mr-2">Instructor:</span>
             <span>{classInfo.instructor}</span>
           </div>
-          <div className="flex items-center text-muted-foreground">
-            <MapPin className="mr-3 h-5 w-5 flex-shrink-0" />
-             <span className="font-semibold mr-2">Location:</span>
-            <span>{classInfo.location}</span>
-          </div>
           {classInfo.description && (
             <>
               <Separator className="my-4" />
@@ -160,17 +156,23 @@ export default function ClassDetailsPage() {
           )}
         </CardContent>
         <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-6">
-            <h3 className="font-headline flex items-center text-lg"><CalendarDays className="mr-2 h-5 w-5"/> Schedule</h3>
+            <h3 className="font-headline flex items-center text-lg"><CalendarDays className="mr-2 h-5 w-5"/> Sessions & Rooms</h3>
             {classInfo.schedule.map((slot, index) => (
-                <div key={index} className="flex justify-between w-full items-center rounded-md border bg-background p-4 gap-4">
-                    <div className="flex items-center font-semibold">
-                        <Clock className="mr-3 h-5 w-5" style={{ color: classInfo.accentColor }} />
-                        <span>{slot.startTime} - {slot.endTime}</span>
+                <div key={index} className="flex flex-col w-full rounded-md border bg-background p-4 gap-3">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center font-semibold">
+                          <Clock className="mr-3 h-5 w-5" style={{ color: classInfo.accentColor }} />
+                          <span>{slot.startTime} - {slot.endTime}</span>
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap justify-end">
+                          {slot.days.map(day => (
+                              <Badge key={day} variant="secondary" className="text-sm">{day}</Badge>
+                          ))}
+                      </div>
                     </div>
-                    <div className="flex gap-1.5 flex-wrap justify-end">
-                        {slot.days.map(day => (
-                            <Badge key={day} variant="secondary" className="text-sm">{day}</Badge>
-                        ))}
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="mr-3 h-4 w-4" style={{ color: classInfo.accentColor }} />
+                      <span className="font-medium">{slot.location}</span>
                     </div>
                 </div>
             ))}

@@ -44,7 +44,6 @@
         "name": { "type": "string" },
         "code": { "type": "string" },
         "instructor": { "type": "string" },
-        "location": { "type": "string" },
         "description": { "type": "string", "description": "An optional description for the class." },
         "accentColor": { "type": "string" },
         "schedule": {
@@ -54,14 +53,15 @@
             "properties": {
               "days": { "type": "array", "items": { "type": "string" } },
               "startTime": { "type": "string" },
-              "endTime": { "type": "string" }
+              "endTime": { "type": "string" },
+              "location": { "type": "string", "description": "The room or building for this specific time slot." }
             },
-            "required": ["days", "startTime", "endTime"]
+            "required": ["days", "startTime", "endTime", "location"]
           }
         },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "name", "code", "instructor", "location", "schedule", "createdAt"]
+      "required": ["userId", "name", "code", "instructor", "schedule", "createdAt"]
     },
     "NoteSummary": {
       "title": "Note Summary",

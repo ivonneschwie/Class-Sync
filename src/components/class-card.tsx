@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +10,12 @@ type ClassCardProps = {
 };
 
 export function ClassCard({ classInfo }: ClassCardProps) {
+  // Get unique locations to show a summary if multiple exist
+  const uniqueLocations = Array.from(new Set(classInfo.schedule.map(s => s.location)));
+  const locationDisplay = uniqueLocations.length > 1 
+    ? `${uniqueLocations[0]} & others` 
+    : uniqueLocations[0] || 'No location set';
+
   return (
     <Link href={`/class/${classInfo.id}`} className="block h-full group focus:outline-none focus:ring-2 focus:ring-primary rounded-lg">
       <Card 
@@ -26,23 +33,26 @@ export function ClassCard({ classInfo }: ClassCardProps) {
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
             <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
-            <span>{classInfo.location}</span>
+            <span className="truncate">{locationDisplay}</span>
           </div>
         </CardContent>
         <CardFooter className="flex-col items-start bg-muted/50 px-6 py-4 mt-auto gap-3">
-          {classInfo.schedule.map((slot, index) => (
+          {classInfo.schedule.slice(0, 2).map((slot, index) => (
               <div key={index} className="flex justify-between w-full items-center text-sm">
                   <div className="flex items-center font-semibold">
                       <Clock className="mr-2 h-4 w-4" style={{ color: classInfo.accentColor }} />
-                      <span>{slot.startTime} - {slot.endTime}</span>
+                      <span>{slot.startTime}</span>
                   </div>
                   <div className="flex gap-1">
                       {slot.days.map(day => (
-                          <Badge key={day} variant="secondary">{day}</Badge>
+                          <Badge key={day} variant="secondary" className="px-1.5">{day}</Badge>
                       ))}
                   </div>
               </div>
           ))}
+          {classInfo.schedule.length > 2 && (
+            <p className="text-[10px] text-muted-foreground uppercase font-bold self-center pt-1">+ {classInfo.schedule.length - 2} more slots</p>
+          )}
         </CardFooter>
       </Card>
     </Link>

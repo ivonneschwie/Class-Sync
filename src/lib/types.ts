@@ -5,6 +5,7 @@ export type ClassSchedule = {
   days: ('M' | 'T' | 'W' | 'Th' | 'F' | 'Sa' | 'Su')[];
   startTime: string; // "HH:mm"
   endTime: string; // "HH:mm"
+  location: string; // Room or building for this slot
 };
 
 export type Class = {
@@ -13,7 +14,6 @@ export type Class = {
   name: string;
   code: string;
   instructor: string;
-  location: string;
   description?: string;
   accentColor: string;
   schedule: ClassSchedule[];
