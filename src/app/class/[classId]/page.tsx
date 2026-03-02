@@ -16,7 +16,6 @@ import type { Class } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 
-
 export default function ClassDetailsPage() {
   const router = useRouter();
   const params = useParams();
@@ -67,16 +66,9 @@ export default function ClassDetailsPage() {
                 <Skeleton className="h-6 w-6 rounded-full mr-3" />
                 <Skeleton className="h-6 w-1/2" />
             </div>
-            <div className="flex items-center">
-                <Skeleton className="h-6 w-6 rounded-full mr-3" />
-                <Skeleton className="h-6 w-2/3" />
-            </div>
           </CardContent>
           <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-6">
             <Skeleton className="h-7 w-1/3 mb-2" />
-            <div className="w-full space-y-2">
-                <Skeleton className="h-16 w-full" />
-            </div>
           </CardFooter>
         </Card>
       </div>
@@ -97,7 +89,7 @@ export default function ClassDetailsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl mx-auto w-full">
        <div className="flex flex-wrap gap-2 justify-between items-center">
          <Button variant="outline" onClick={() => router.push('/')}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -133,46 +125,47 @@ export default function ClassDetailsPage() {
 
       <Card>
         <CardHeader className="border-b-4 pb-4" style={{ borderColor: classInfo.accentColor }}>
-          <CardTitle className="font-headline text-3xl">{classInfo.name}</CardTitle>
-          <CardDescription className="text-lg pt-1">{classInfo.code}</CardDescription>
+          <CardTitle className="font-headline text-4xl">{classInfo.name}</CardTitle>
+          <CardDescription className="text-xl pt-1">{classInfo.code}</CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 space-y-4">
-          <div className="flex items-center text-muted-foreground">
-            <User className="mr-3 h-5 w-5 flex-shrink-0" />
+        <CardContent className="pt-8 space-y-6">
+          <div className="flex items-center text-xl text-muted-foreground">
+            <User className="mr-4 h-6 w-6 flex-shrink-0" />
             <span className="font-semibold mr-2">Instructor:</span>
-            <span>{classInfo.instructor}</span>
+            <span className="text-foreground">{classInfo.instructor}</span>
           </div>
           {classInfo.description && (
             <>
-              <Separator className="my-4" />
+              <Separator />
               <div className="flex items-start text-muted-foreground">
-                <FileText className="mr-3 h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <span className="font-semibold text-card-foreground">Description</span>
-                  <p className="text-foreground whitespace-pre-wrap">{classInfo.description}</p>
+                <FileText className="mr-4 h-6 w-6 flex-shrink-0 mt-0.5" />
+                <div className="space-y-2">
+                  <span className="font-semibold text-xl text-card-foreground">Description</span>
+                  <p className="text-lg text-foreground whitespace-pre-wrap leading-relaxed">{classInfo.description}</p>
                 </div>
               </div>
             </>
           )}
         </CardContent>
-        <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-6">
-            <h3 className="font-headline flex items-center text-lg"><CalendarDays className="mr-2 h-5 w-5"/> Sessions & Rooms</h3>
+        <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-8">
+            <h3 className="font-headline flex items-center text-2xl mb-2"><CalendarDays className="mr-3 h-6 w-6 text-primary"/> Sessions & Rooms</h3>
             {classInfo.schedule.map((slot, index) => (
-                <div key={index} className="flex flex-col w-full rounded-md border bg-background p-4 gap-3">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center font-semibold">
+                <div key={index} className="flex flex-col w-full rounded-xl border bg-background p-5 gap-4 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                      <div className="flex items-center font-bold text-lg">
                           <Clock className="mr-3 h-5 w-5" style={{ color: classInfo.accentColor }} />
                           <span>{slot.startTime} - {slot.endTime}</span>
+                          <Separator orientation="vertical" className="mx-4 h-6 hidden sm:block" />
+                          <div className="flex items-center text-muted-foreground font-medium">
+                            <MapPin className="mr-2 h-4 w-4" style={{ color: classInfo.accentColor }} />
+                            <span>{slot.location}</span>
+                          </div>
                       </div>
-                      <div className="flex gap-1.5 flex-wrap justify-end">
+                      <div className="flex gap-2 flex-wrap">
                           {slot.days.map(day => (
-                              <Badge key={day} variant="secondary" className="text-sm">{day}</Badge>
+                              <Badge key={day} variant="secondary" className="px-3 py-1 text-sm font-bold">{dayLabels[day] || day}</Badge>
                           ))}
                       </div>
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="mr-3 h-4 w-4" style={{ color: classInfo.accentColor }} />
-                      <span className="font-medium">{slot.location}</span>
                     </div>
                 </div>
             ))}
@@ -180,11 +173,11 @@ export default function ClassDetailsPage() {
       </Card>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[480px] max-h-[90vh] flex flex-col">
+        <DialogContent className="sm:max-w-[520px] max-h-[90vh] flex flex-col">
             <DialogHeader>
-                <DialogTitle className="font-headline">Edit Class</DialogTitle>
+                <DialogTitle className="font-headline text-2xl">Edit Class</DialogTitle>
             </DialogHeader>
-            <div className="flex-grow overflow-y-auto -mr-6 pr-6">
+            <div className="flex-grow overflow-y-auto -mr-6 pr-6 py-4">
                 <AddClassForm onSave={handleUpdateClass} classToEdit={classInfo} />
             </div>
         </DialogContent>
