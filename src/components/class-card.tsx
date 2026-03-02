@@ -16,34 +16,34 @@ export function ClassCard({ classInfo }: ClassCardProps) {
         style={{ borderTopColor: classInfo.accentColor }}
       >
         <CardHeader className="pb-4">
-          <CardTitle className="font-headline text-2xl mb-1">{classInfo.name}</CardTitle>
-          <CardDescription className="text-base font-medium">{classInfo.code}</CardDescription>
+          <CardTitle className="font-headline text-3xl mb-1">{classInfo.name}</CardTitle>
+          <CardDescription className="text-lg font-medium">{classInfo.code}</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow space-y-4">
-          <div className="flex items-center text-base text-muted-foreground">
+          <div className="flex items-center text-lg text-muted-foreground">
             <User className="mr-3 h-5 w-5 flex-shrink-0" />
             <span className="font-medium">{classInfo.instructor}</span>
           </div>
         </CardContent>
-        <CardFooter className="flex-col items-start bg-muted/40 px-6 py-6 mt-auto gap-5">
+        <CardFooter className="flex-col items-start bg-muted/40 px-6 py-6 mt-auto gap-6">
           {classInfo.schedule.slice(0, 3).map((slot, index) => (
               <div key={index} className="flex flex-col w-full gap-2">
-                  <div className="flex justify-between w-full items-center text-base">
+                  <div className="flex justify-between w-full items-center text-lg">
                       <div className="flex items-center gap-4 min-w-0">
                         <div className="flex items-center font-bold text-foreground shrink-0">
-                            <Clock className="mr-2 h-4 w-4" style={{ color: classInfo.accentColor }} />
+                            <Clock className="mr-2 h-5 w-5" style={{ color: classInfo.accentColor }} />
                             <span>{slot.startTime}</span>
                         </div>
                         {slot.location && (
-                            <div className="flex items-center text-sm font-semibold text-muted-foreground truncate border-l-2 border-muted pl-3 ml-1">
-                                <MapPin className="mr-2 h-3.5 w-3.5 shrink-0" style={{ color: classInfo.accentColor }} />
-                                <span className="truncate max-w-[120px]">{slot.location}</span>
+                            <div className="flex items-center text-base font-semibold text-muted-foreground truncate border-l-2 border-muted pl-3 ml-1">
+                                <MapPin className="mr-2 h-4 w-4 shrink-0" style={{ color: classInfo.accentColor }} />
+                                <span className="truncate max-w-[140px]">{slot.location}</span>
                             </div>
                         )}
                       </div>
                       <div className="flex gap-1.5 shrink-0">
                           {slot.days.map(day => (
-                              <Badge key={day} variant="secondary" className="px-2 py-0.5 text-xs font-bold">{day}</Badge>
+                              <Badge key={day} variant="secondary" className="px-2.5 py-1 text-xs font-bold">{day}</Badge>
                           ))}
                       </div>
                   </div>

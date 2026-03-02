@@ -8,7 +8,7 @@ import { MapPin } from 'lucide-react';
 // --- Configuration ---
 const START_HOUR = 7;
 const END_HOUR = 17; // 5 PM
-const HOUR_HEIGHT = 100; // Increased height for better visibility of larger text
+const HOUR_HEIGHT = 110; // Slightly taller for larger text
 
 const orderedDays: Class['schedule'][number]['days'][number][] = ['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'];
 
@@ -47,7 +47,7 @@ export default function TimetablePage() {
 
       <Card className="flex-1 overflow-auto shadow-md">
         <CardContent className="p-0">
-          <div className="min-w-[1000px]">
+          <div className="min-w-[1100px]">
             {/* Header Row */}
             <div className="grid grid-cols-[80px_repeat(7,1fr)] sticky top-0 z-10 bg-slate-900 text-white">
               {/* Top-left empty cell */}
@@ -115,16 +115,16 @@ export default function TimetablePage() {
                               borderColor: classInfo.accentColor,
                             }}
                           >
-                            <p className="font-black text-sm leading-tight mb-1" style={{ color: classInfo.accentColor }}>
+                            <p className="font-black text-base leading-tight mb-1" style={{ color: classInfo.accentColor }}>
                                 {classInfo.name}
                             </p>
-                            <p className="text-[11px] font-bold opacity-80 mb-1.5" style={{ color: classInfo.accentColor }}>
+                            <p className="text-sm font-bold opacity-80 mb-2" style={{ color: classInfo.accentColor }}>
                                 {scheduleItem.startTime} - {scheduleItem.endTime}
                             </p>
                             {scheduleItem.location && (
-                                <div className="flex items-center gap-1.5 opacity-90 border-t border-current/20 pt-1">
-                                    <MapPin className="h-3 w-3 shrink-0" style={{ color: classInfo.accentColor }} />
-                                    <p className="text-[10px] font-black truncate uppercase tracking-widest" style={{ color: classInfo.accentColor }}>
+                                <div className="flex items-center gap-1.5 opacity-90 border-t border-current/20 pt-1.5">
+                                    <MapPin className="h-3.5 w-3.5 shrink-0" style={{ color: classInfo.accentColor }} />
+                                    <p className="text-xs font-black truncate uppercase tracking-widest" style={{ color: classInfo.accentColor }}>
                                         {scheduleItem.location}
                                     </p>
                                 </div>

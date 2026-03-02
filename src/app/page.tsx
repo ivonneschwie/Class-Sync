@@ -59,7 +59,7 @@ export default function SchedulePage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold font-headline tracking-tight">My Schedule</h1>
-            <p className="text-lg text-muted-foreground">Your weekly class overview.</p>
+            <p className="text-xl text-muted-foreground">Your weekly class overview.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto text-base h-11 px-6">
@@ -85,7 +85,7 @@ export default function SchedulePage() {
                       <AlertTriangle className="h-10 w-10 text-muted-foreground" />
                   </div>
                   <CardTitle className="mt-6 font-headline text-3xl">No Classes Yet</CardTitle>
-                  <CardDescription className="mt-3 text-lg">
+                  <CardDescription className="mt-3 text-xl">
                   Your schedule is empty. Click "Add Class" to get started.
                   </CardDescription>
               </CardHeader>
