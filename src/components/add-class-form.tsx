@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,11 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'schedule',
+  });
+
   useEffect(() => {
     if (classToEdit) {
       form.reset({
@@ -62,7 +67,11 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
         location: classToEdit.location,
         description: classToEdit.description || '',
         accentColor: classToEdit.accentColor,
-        schedule: classToEdit.schedule.map(s => ({...s, days: [...s.days]})) // Ensure deep copy
+        schedule: classToEdit.schedule.map(s => ({
+          days: [...s.days] as ('M' | 'T' | 'W' | 'Th' | 'F' | 'Sa' | 'Su')[],
+          startTime: s.startTime,
+          endTime: s.endTime
+        }))
       });
     } else {
         form.reset({
@@ -76,11 +85,6 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
         });
     }
   }, [classToEdit, form]);
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'schedule',
-  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onSave(values);
@@ -198,8 +202,8 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
             <div className="space-y-4">
                 {fields.map((field, index) => (
                     <div key={field.id} className="p-4 border rounded-lg space-y-4 relative bg-muted/50">
-                        <div className="flex justify-between items-center mb-4">
-                            <FormLabel className="font-semibold">Time Slot #{index + 1}</FormLabel>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Time Slot #{index + 1}</span>
                             {fields.length > 1 && (
                                 <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => remove(index)}>
                                     <Trash2 className="h-4 w-4" />
@@ -210,34 +214,26 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                         <FormField
                             control={form.control}
                             name={`schedule.${index}.days`}
-                            render={() => (
+                            render={({ field: daysField }) => (
                                 <FormItem>
                                 <FormLabel>Days</FormLabel>
                                 <div className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
                                     {daysOfWeek.map((day) => (
-                                    <Controller
-                                        key={day}
-                                        name={`schedule.${index}.days`}
-                                        control={form.control}
-                                        render={({ field }) => (
-                                        <FormItem className="flex items-center space-x-2 space-y-0">
-                                            <FormControl>
+                                        <div key={day} className="flex items-center space-x-2">
                                             <Checkbox
-                                                checked={field.value?.includes(day)}
+                                                id={`schedule-${index}-day-${day}`}
+                                                checked={daysField.value?.includes(day)}
                                                 onCheckedChange={(checked) => {
-                                                const currentDays = field.value || [];
-                                                return checked
-                                                    ? field.onChange([...currentDays, day])
-                                                    : field.onChange(
-                                                        currentDays.filter((value) => value !== day)
-                                                    );
+                                                    const currentDays = daysField.value || [];
+                                                    return checked
+                                                        ? daysField.onChange([...currentDays, day])
+                                                        : daysField.onChange(currentDays.filter((value) => value !== day));
                                                 }}
                                             />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">{day}</FormLabel>
-                                        </FormItem>
-                                        )}
-                                    />
+                                            <label htmlFor={`schedule-${index}-day-${day}`} className="text-sm font-normal cursor-pointer select-none">
+                                                {day}
+                                            </label>
+                                        </div>
                                     ))}
                                 </div>
                                 <FormMessage />
