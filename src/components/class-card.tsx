@@ -25,28 +25,26 @@ export function ClassCard({ classInfo }: ClassCardProps) {
             <span className="font-medium">{classInfo.instructor}</span>
           </div>
         </CardContent>
-        <CardFooter className="flex-col items-start bg-muted/40 px-6 py-6 mt-auto gap-6">
-          {classInfo.schedule.slice(0, 3).map((slot, index) => (
-              <div key={index} className="flex flex-col w-full gap-2">
-                  <div className="flex justify-between w-full items-center text-lg">
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="flex items-center font-bold text-foreground shrink-0">
-                            <Clock className="mr-2 h-5 w-5" style={{ color: classInfo.accentColor }} />
-                            <span>{slot.startTime}</span>
-                        </div>
-                        {slot.location && (
-                            <div className="flex items-center text-base font-semibold text-muted-foreground truncate border-l-2 border-muted pl-3 ml-1">
-                                <MapPin className="mr-2 h-4 w-4 shrink-0" style={{ color: classInfo.accentColor }} />
-                                <span className="truncate max-w-[140px]">{slot.location}</span>
-                            </div>
-                        )}
+        <CardFooter className="flex-col items-start bg-muted/50 px-6 py-4 mt-auto gap-4">
+          {classInfo.schedule.slice(0, 2).map((slot, index) => (
+              <div key={index} className="flex flex-col w-full gap-1.5">
+                  <div className="flex justify-between w-full items-center text-sm">
+                      <div className="flex items-center font-semibold">
+                          <Clock className="mr-2 h-4 w-4" style={{ color: classInfo.accentColor }} />
+                          <span>{slot.startTime}</span>
                       </div>
-                      <div className="flex gap-1.5 shrink-0">
+                      <div className="flex gap-1">
                           {slot.days.map(day => (
                               <Badge key={day} variant="secondary" className="px-2.5 py-1 text-xs font-bold">{day}</Badge>
                           ))}
                       </div>
                   </div>
+                  {slot.location && (
+                      <div className="flex items-center text-[11px] text-muted-foreground ml-6">
+                          <MapPin className="mr-1.5 h-3 w-3" />
+                          <span className="truncate">{slot.location}</span>
+                      </div>
+                  )}
               </div>
           ))}
           {classInfo.schedule.length > 3 && (
