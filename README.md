@@ -8,18 +8,22 @@ To get started, take a look at `src/app/page.tsx`.
 
 ## GitHub Authentication
 
-If you see an "Invalid username or token" error when pushing to GitHub, you need to use a **Personal Access Token (classic)** instead of your password.
+### Option 1: VS Code Built-in (Recommended)
+1. Click the **Accounts** icon (person icon) in the bottom-left corner of VS Code.
+2. Select **Sign in to Sync Settings** or **Sign in with GitHub**.
+3. Follow the browser prompts to authorize VS Code.
+4. VS Code will now handle your Git credentials automatically in most cases.
 
-### Steps to generate a token:
+### Option 2: Personal Access Token (Manual)
+If you are still prompted for a password in the terminal:
 1. Log in to your GitHub account.
 2. Click your profile photo (top-right) > **Settings**.
 3. Scroll down on the left sidebar > **Developer settings**.
 4. Left sidebar > **Personal access tokens** > **Tokens (classic)**.
 5. Click **Generate new token** > **Generate new token (classic)**.
-6. Give it a note (e.g., "ClassSync Token").
-7. Select the **repo** scope.
-8. Click **Generate token** at the bottom.
-9. **Copy the token immediately.** You will use this token as your password in the terminal.
+6. Give it a note (e.g., "ClassSync Token") and select the **repo** scope.
+7. Click **Generate token** and **copy it immediately**.
+8. Use this token as your password when the terminal asks for it.
 
 ## Features
 - **Schedule Management**: Keep track of your weekly classes.
