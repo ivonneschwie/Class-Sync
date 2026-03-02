@@ -8,7 +8,7 @@ import { MapPin } from 'lucide-react';
 // --- Configuration ---
 const START_HOUR = 7;
 const END_HOUR = 17; // 5 PM
-const HOUR_HEIGHT = 80; // pixels
+const HOUR_HEIGHT = 100; // Increased height for better visibility of larger text
 
 const orderedDays: Class['schedule'][number]['days'][number][] = ['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'];
 
@@ -39,34 +39,36 @@ export default function TimetablePage() {
   const timeSlots = generateTimeSlots();
 
   return (
-    <div className="flex flex-col h-full gap-4">
-      <div>
-        <h1 className="text-3xl font-bold font-headline">Time Table</h1>
-        <p className="text-muted-foreground">Your weekly schedule at a glance.</p>
+    <div className="flex flex-col h-full gap-6">
+      <div className="space-y-2">
+        <h1 className="text-4xl font-bold font-headline tracking-tight">Time Table</h1>
+        <p className="text-lg text-muted-foreground">Your weekly schedule at a glance.</p>
       </div>
 
-      <Card className="flex-1 overflow-auto">
+      <Card className="flex-1 overflow-auto shadow-md">
         <CardContent className="p-0">
-          <div className="min-w-[900px]">
+          <div className="min-w-[1000px]">
             {/* Header Row */}
-            <div className="grid grid-cols-[60px_repeat(7,1fr)] sticky top-0 z-10 bg-gray-800 text-white">
+            <div className="grid grid-cols-[80px_repeat(7,1fr)] sticky top-0 z-10 bg-slate-900 text-white">
               {/* Top-left empty cell */}
-              <div className="border-r border-b border-gray-600"></div>
+              <div className="border-r border-b border-slate-700"></div>
               {/* Day Headers */}
               {orderedDays.map(day => (
-                <div key={day} className="text-center font-bold p-2 border-r border-b last:border-r-0 border-gray-600">
+                <div key={day} className="text-center font-bold font-headline text-lg p-4 border-r border-b last:border-r-0 border-slate-700">
                   {day}
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-[60px_repeat(7,1fr)]">
+            <div className="grid grid-cols-[80px_repeat(7,1fr)]">
 
               {/* Time Gutter */}
-              <div className="row-start-1 border-r">
+              <div className="row-start-1 border-r border-muted bg-muted/10">
                 {timeSlots.map(hour => (
                   <div key={hour} style={{ height: HOUR_HEIGHT }} className="relative">
-                    <span className="absolute -top-3.5 right-2 text-sm text-muted-foreground z-[8]">{formatHour(hour)}</span>
+                    <span className="absolute -top-3.5 right-3 text-xs font-bold text-muted-foreground z-[8] uppercase tracking-tighter">
+                        {formatHour(hour)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -76,9 +78,9 @@ export default function TimetablePage() {
                 {/* Background Lines */}
                 <div className="grid grid-cols-7 h-full">
                     {orderedDays.map(day => (
-                    <div key={day} className="col-span-1 border-r last:border-r-0">
+                    <div key={day} className="col-span-1 border-r last:border-r-0 border-muted">
                         {timeSlots.map((_, index) => (
-                        <div key={index} style={{ height: HOUR_HEIGHT }} className="border-b"></div>
+                        <div key={index} style={{ height: HOUR_HEIGHT }} className="border-b border-muted/50"></div>
                         ))}
                     </div>
                     ))}
@@ -103,22 +105,26 @@ export default function TimetablePage() {
                         return (
                           <div
                             key={`${classInfo.id}-${scheduleIndex}-${day}`}
-                            className="absolute p-2 rounded-lg border overflow-hidden shadow-sm transition-transform hover:scale-[1.02] hover:z-20 cursor-default"
+                            className="absolute p-3 rounded-lg border-2 overflow-hidden shadow-sm transition-all hover:scale-[1.03] hover:shadow-lg hover:z-20 cursor-default"
                             style={{
                               top: `${top}px`,
                               height: `${height}px`,
-                              left: `calc(${(dayIndex / 7) * 100}% + 4px)`,
-                              width: `calc(${(1 / 7) * 100}% - 8px)`,
-                              backgroundColor: `${classInfo.accentColor}20`,
+                              left: `calc(${(dayIndex / 7) * 100}% + 6px)`,
+                              width: `calc(${(1 / 7) * 100}% - 12px)`,
+                              backgroundColor: `${classInfo.accentColor}25`,
                               borderColor: classInfo.accentColor,
                             }}
                           >
-                            <p className="font-bold text-sm leading-tight truncate" style={{ color: classInfo.accentColor }}>{classInfo.name}</p>
-                            <p className="text-[10px] font-medium" style={{ color: classInfo.accentColor }}>{scheduleItem.startTime} - {scheduleItem.endTime}</p>
+                            <p className="font-black text-sm leading-tight mb-1" style={{ color: classInfo.accentColor }}>
+                                {classInfo.name}
+                            </p>
+                            <p className="text-[11px] font-bold opacity-80 mb-1.5" style={{ color: classInfo.accentColor }}>
+                                {scheduleItem.startTime} - {scheduleItem.endTime}
+                            </p>
                             {scheduleItem.location && (
-                                <div className="flex items-center gap-1 mt-1 opacity-90">
-                                    <MapPin className="h-2.5 w-2.5" style={{ color: classInfo.accentColor }} />
-                                    <p className="text-[10px] font-semibold truncate uppercase tracking-wider" style={{ color: classInfo.accentColor }}>
+                                <div className="flex items-center gap-1.5 opacity-90 border-t border-current/20 pt-1">
+                                    <MapPin className="h-3 w-3 shrink-0" style={{ color: classInfo.accentColor }} />
+                                    <p className="text-[10px] font-black truncate uppercase tracking-widest" style={{ color: classInfo.accentColor }}>
                                         {scheduleItem.location}
                                     </p>
                                 </div>

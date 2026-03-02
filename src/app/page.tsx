@@ -57,20 +57,20 @@ export default function SchedulePage() {
     <>
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold font-headline tracking-tight">My Schedule</h1>
-            <p className="text-muted-foreground">Your weekly class overview.</p>
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold font-headline tracking-tight">My Schedule</h1>
+            <p className="text-lg text-muted-foreground">Your weekly class overview.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
-                <PlusCircle className="mr-2 h-4 w-4" />
+            <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto text-base h-11 px-6">
+                <PlusCircle className="mr-2 h-5 w-5" />
                 Add Class
             </Button>
           </div>
         </div>
 
         {sortedClasses.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {sortedClasses.map((c) => (
               <ClassCard 
                 key={c.id} 
@@ -79,19 +79,19 @@ export default function SchedulePage() {
             ))}
           </div>
         ) : (
-          <Card className="flex flex-col items-center justify-center py-20 text-center border-dashed">
+          <Card className="flex flex-col items-center justify-center py-24 text-center border-dashed">
               <CardHeader>
-                  <div className="mx-auto bg-secondary rounded-full p-3">
-                      <AlertTriangle className="h-8 w-8 text-muted-foreground" />
+                  <div className="mx-auto bg-secondary rounded-full p-4">
+                      <AlertTriangle className="h-10 w-10 text-muted-foreground" />
                   </div>
-                  <CardTitle className="mt-4 font-headline">No Classes Yet</CardTitle>
-                  <CardDescription className="mt-2">
+                  <CardTitle className="mt-6 font-headline text-3xl">No Classes Yet</CardTitle>
+                  <CardDescription className="mt-3 text-lg">
                   Your schedule is empty. Click "Add Class" to get started.
                   </CardDescription>
               </CardHeader>
-              <CardContent>
-                  <Button onClick={() => setIsAddDialogOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
+              <CardContent className="mt-4">
+                  <Button onClick={() => setIsAddDialogOpen(true)} size="lg" className="text-base h-12 px-8">
+                    <PlusCircle className="mr-2 h-5 w-5" />
                     Add Class
                   </Button>
               </CardContent>
@@ -100,11 +100,11 @@ export default function SchedulePage() {
       </div>
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogContent className="sm:max-w-[480px] max-h-[90vh] flex flex-col">
+          <DialogContent className="sm:max-w-[520px] max-h-[90vh] flex flex-col">
             <DialogHeader>
-              <DialogTitle className="font-headline">Add New Class</DialogTitle>
+              <DialogTitle className="font-headline text-2xl">Add New Class</DialogTitle>
             </DialogHeader>
-            <div className="flex-grow overflow-y-auto -mr-6 pr-6">
+            <div className="flex-grow overflow-y-auto -mr-6 pr-6 py-4">
                 <AddClassForm onSave={handleAddClass} />
             </div>
           </DialogContent>
