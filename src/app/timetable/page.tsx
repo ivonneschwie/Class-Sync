@@ -3,6 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import type { Class } from '@/lib/types';
 import { useClasses } from '@/context/classes-context';
+import { MapPin } from 'lucide-react';
 
 // --- Configuration ---
 const START_HOUR = 7;
@@ -102,7 +103,7 @@ export default function TimetablePage() {
                         return (
                           <div
                             key={`${classInfo.id}-${scheduleIndex}-${day}`}
-                            className="absolute p-2 rounded-lg border overflow-hidden"
+                            className="absolute p-2 rounded-lg border overflow-hidden shadow-sm transition-transform hover:scale-[1.02] hover:z-20 cursor-default"
                             style={{
                               top: `${top}px`,
                               height: `${height}px`,
@@ -112,8 +113,16 @@ export default function TimetablePage() {
                               borderColor: classInfo.accentColor,
                             }}
                           >
-                            <p className="font-bold text-sm leading-tight" style={{ color: classInfo.accentColor }}>{classInfo.name}</p>
-                            <p className="text-xs" style={{ color: classInfo.accentColor }}>{scheduleItem.startTime} - {scheduleItem.endTime}</p>
+                            <p className="font-bold text-sm leading-tight truncate" style={{ color: classInfo.accentColor }}>{classInfo.name}</p>
+                            <p className="text-[10px] font-medium" style={{ color: classInfo.accentColor }}>{scheduleItem.startTime} - {scheduleItem.endTime}</p>
+                            {scheduleItem.location && (
+                                <div className="flex items-center gap-1 mt-1 opacity-90">
+                                    <MapPin className="h-2.5 w-2.5" style={{ color: classInfo.accentColor }} />
+                                    <p className="text-[10px] font-semibold truncate uppercase tracking-wider" style={{ color: classInfo.accentColor }}>
+                                        {scheduleItem.location}
+                                    </p>
+                                </div>
+                            )}
                           </div>
                         );
                       })
@@ -128,5 +137,3 @@ export default function TimetablePage() {
     </div>
   );
 }
-
-    
