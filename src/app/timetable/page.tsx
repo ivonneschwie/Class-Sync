@@ -3,11 +3,13 @@
 
 import { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import type { ClassSchedule } from '@/lib/types';
+import type { Class, ClassSchedule } from '@/lib/types';
 import { useClasses } from '@/context/classes-context';
-import { MapPin, CalendarDays, Inbox, Clock } from 'lucide-react';
+import { MapPin, CalendarDays, Inbox, Clock, Coffee } from 'lucide-react';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 const orderedDays: ClassSchedule['days'][number][] = ['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'];
 const dayLabels: Record<string, string> = {
@@ -26,16 +28,50 @@ const timeToMinutes = (time: string) => {
   return hours * 60 + minutes;
 };
 
+type TimetableItem = 
+  | { type: 'class', data: Class & { currentSchedule: ClassSchedule } } 
+  | { type: 'break', startTime: string, endTime: string, durationMinutes: number };
+
 export default function TimetablePage() {
   const { classes } = useClasses();
   const [activeDay, setActiveDay] = useState<string>('M');
 
-  const dayClasses = useMemo(() => {
-    return classes.flatMap(c => 
+  const dayItems = useMemo(() => {
+    const sortedClasses = classes.flatMap(c => 
       c.schedule
         .filter(s => s.days.includes(activeDay as any))
         .map(s => ({ ...c, currentSchedule: s }))
     ).sort((a, b) => timeToMinutes(a.currentSchedule.startTime) - timeToMinutes(b.currentSchedule.startTime));
+
+    const items: TimetableItem[] = [];
+    
+    for (let i = 0; i < sortedClasses.length; i++) {
+        const currentClass = sortedClasses[i];
+        
+        // Check for break before this class (if it's not the first class)
+        if (i > 0) {
+            const previousClass = sortedClasses[i-1];
+            const prevEnd = timeToMinutes(previousClass.currentSchedule.endTime);
+            const currStart = timeToMinutes(currentClass.currentSchedule.startTime);
+            
+            if (currStart > prevEnd) {
+                const duration = currStart - prevEnd;
+                // Only show significant breaks (e.g. >= 5 mins)
+                if (duration >= 5) {
+                    items.push({
+                        type: 'break',
+                        startTime: previousClass.currentSchedule.endTime,
+                        endTime: currentClass.currentSchedule.startTime,
+                        durationMinutes: duration
+                    });
+                }
+            }
+        }
+        
+        items.push({ type: 'class', data: currentClass });
+    }
+    
+    return items;
   }, [classes, activeDay]);
 
   return (
@@ -68,37 +104,57 @@ export default function TimetablePage() {
               {dayLabels[activeDay]}
             </h2>
 
-            {dayClasses.length > 0 ? (
+            {dayItems.length > 0 ? (
               <div className="space-y-4">
-                {dayClasses.map((item, idx) => (
-                  <Card key={`${item.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md" style={{ borderLeftColor: item.accentColor }}>
-                    <CardContent className="p-5 flex flex-col md:flex-row md:items-center gap-4">
-                      <div className="flex items-center gap-3 min-w-[180px] font-bold text-lg">
-                        <Clock className="h-5 w-5 text-muted-foreground shrink-0" />
-                        <span>{item.currentSchedule.startTime} - {item.currentSchedule.endTime}</span>
+                {dayItems.map((item, idx) => {
+                  if (item.type === 'break') {
+                    return (
+                      <div key={`break-${idx}`} className="flex items-center gap-4 px-5 py-3 border-2 border-dashed rounded-xl bg-muted/20 opacity-70">
+                        <div className="flex items-center gap-2 text-muted-foreground font-semibold">
+                          <Coffee className="h-4 w-4" />
+                          <span className="text-sm uppercase tracking-wider">{item.durationMinutes} min break</span>
+                        </div>
+                        <Separator orientation="vertical" className="h-4 mx-2" />
+                        <span className="text-xs text-muted-foreground">{item.startTime} - {item.endTime}</span>
                       </div>
-                      
-                      <div className="hidden md:block h-8 w-px bg-border mx-2" />
+                    );
+                  }
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                          <h3 className="font-bold text-xl truncate">{item.name}</h3>
-                          <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <MapPin className="h-4 w-4 shrink-0" style={{ color: item.accentColor }} />
-                            <span className="text-base font-medium truncate">{item.currentSchedule.location || 'No location set'}</span>
+                  const classData = item.data;
+                  return (
+                    <Card key={`${classData.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md" style={{ borderLeftColor: classData.accentColor }}>
+                      <CardContent className="p-5">
+                        <div className="flex flex-col gap-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <h3 className="font-bold text-xl truncate">{classData.name}</h3>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                                <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight">{classData.code}</span>
+                                <span>• {classData.instructor}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center flex-wrap gap-y-2 text-muted-foreground font-semibold">
+                            <div className="flex items-center gap-2 pr-4">
+                              <Clock className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
+                              <span className="text-base">{classData.currentSchedule.startTime} - {classData.currentSchedule.endTime}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 pl-4 border-l">
+                              <MapPin className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
+                              <span className="text-base text-foreground">{classData.currentSchedule.location || 'No location set'}</span>
+                            </div>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1 font-medium">{item.code} • {item.instructor}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed rounded-2xl bg-muted/5">
                 <Inbox className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
                 <h3 className="text-xl font-bold font-headline">No Classes Scheduled</h3>
-                <p className="text-muted-foreground">Enjoy your free time!</p>
+                <p className="text-muted-foreground text-lg">Enjoy your free time!</p>
               </div>
             )}
           </div>
