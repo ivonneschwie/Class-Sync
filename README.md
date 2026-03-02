@@ -9,10 +9,9 @@ To get started, take a look at `src/app/page.tsx`.
 ## GitHub Authentication
 
 ### Option 1: VS Code Built-in (Recommended)
-1. Click the **Accounts** icon (person icon) in the bottom-left corner of VS Code.
-2. Select **Sign in to Sync Settings** or **Sign in with GitHub**.
-3. Follow the browser prompts to authorize VS Code.
-4. VS Code will now handle your Git credentials automatically in most cases.
+1. **Via Command Palette:** Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type **"GitHub: Sign In"**. Follow the prompts to authorize.
+2. **Via Accounts Menu:** Click the **Accounts** icon (person icon) in the bottom-left corner of VS Code and select **Sign in with GitHub**.
+3. VS Code will now handle your Git credentials automatically in most cases.
 
 ### Option 2: Personal Access Token (Manual)
 If you are still prompted for a password in the terminal:
