@@ -9,9 +9,11 @@ To get started, take a look at `src/app/page.tsx`.
 ## GitHub Authentication
 
 ### Option 1: VS Code Built-in (Recommended)
-1. **Via Command Palette:** Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type **"GitHub: Sign In"**. Follow the prompts to authorize.
-2. **Via Accounts Menu:** Click the **Accounts** icon (person icon) in the bottom-left corner of VS Code and select **Sign in with GitHub**.
-3. VS Code will now handle your Git credentials automatically in most cases.
+If you don't see the Accounts icon in the bottom-left, use the Command Palette:
+1. **Open Command Palette:** Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac).
+2. **Search:** Type **"GitHub: Sign In"** and select it.
+3. **Authorize:** Follow the browser prompts to link your account. 
+4. VS Code will now handle your Git credentials automatically.
 
 ### Option 2: Personal Access Token (Manual)
 If you are still prompted for a password in the terminal:
@@ -22,7 +24,7 @@ If you are still prompted for a password in the terminal:
 5. Click **Generate new token** > **Generate new token (classic)**.
 6. Give it a note (e.g., "ClassSync Token") and select the **repo** scope.
 7. Click **Generate token** and **copy it immediately**.
-8. Use this token as your password when the terminal asks for it.
+8. Use this token as your **password** when the terminal asks for it.
 
 ## Features
 - **Schedule Management**: Keep track of your weekly classes.
