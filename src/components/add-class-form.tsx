@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -9,18 +8,32 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Class } from '@/lib/types';
-import { PlusCircle, Trash2, MapPin } from 'lucide-react';
+import { PlusCircle, Trash2, MapPin, Check } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 const daysOfWeek = ['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'] as const;
 
+const PRESET_COLORS = [
+  '#8B5CF6', // Violet
+  '#3B82F6', // Blue
+  '#10B981', // Green
+  '#F59E0B', // Amber
+  '#EF4444', // Red
+  '#EC4899', // Pink
+  '#06B6D4', // Cyan
+  '#6366F1', // Indigo
+  '#84cc16', // Lime
+  '#f97316', // Orange
+];
+
 const scheduleSchema = z.object({
   days: z.array(z.enum(daysOfWeek)).min(1, "Select at least one day."),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)."),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)."),
-  location: z.string().min(2, "Room/Building must be at least 2 characters."),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time (HH:mm)."),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time (HH:mm)."),
+  location: z.string().min(2, "Room/Building required."),
 }).refine((data) => data.startTime < data.endTime, {
   message: "End time must be after start time.",
   path: ["endTime"],
@@ -73,15 +86,6 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
           location: s.location || ''
         }))
       });
-    } else {
-        form.reset({
-            name: '',
-            code: '',
-            instructor: '',
-            description: '',
-            accentColor: '#8B5CF6',
-            schedule: [{ days: [], startTime: '', endTime: '', location: '' }],
-        });
     }
   }, [classToEdit, form]);
 
@@ -136,31 +140,63 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                 )}
             />
             </div>
-            <div className="grid grid-cols-1 gap-4">
-                 <FormField
-                    control={form.control}
-                    name="accentColor"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Accent Color</FormLabel>
+            
+            <FormField
+                control={form.control}
+                name="accentColor"
+                render={({ field }) => (
+                    <FormItem className="space-y-3">
+                        <FormLabel>Class Color</FormLabel>
                         <FormControl>
-                            <div className="relative flex items-center">
-                                <Input type="text" {...field} className="pr-12"/>
-                                <div className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10">
-                                    <input 
-                                      type="color" 
-                                      value={field.value} 
-                                      onChange={e => field.onChange(e.target.value)} 
-                                      className="w-full h-full p-1 border-0 cursor-pointer bg-transparent rounded-md"
-                                    />
+                            <div className="space-y-3">
+                                <div className="flex flex-wrap gap-2">
+                                    {PRESET_COLORS.map((color) => (
+                                        <button
+                                            key={color}
+                                            type="button"
+                                            className={cn(
+                                                "h-8 w-8 rounded-full border-2 border-transparent transition-all hover:scale-110 flex items-center justify-center",
+                                                field.value === color && "border-primary ring-2 ring-primary/20 scale-110"
+                                            )}
+                                            style={{ backgroundColor: color }}
+                                            onClick={() => field.onChange(color)}
+                                        >
+                                            {field.value === color && <Check className="h-4 w-4 text-white drop-shadow-md" />}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative flex-1">
+                                        <div 
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border shadow-sm"
+                                            style={{ backgroundColor: field.value }}
+                                        />
+                                        <Input 
+                                            {...field} 
+                                            placeholder="#HEXCODE" 
+                                            className="pl-9 font-mono text-xs uppercase"
+                                            onChange={(e) => field.onChange(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="relative h-10 w-10 shrink-0">
+                                        <input 
+                                            type="color" 
+                                            value={field.value} 
+                                            onChange={e => field.onChange(e.target.value)} 
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        />
+                                        <Button variant="outline" size="icon" type="button" className="h-full w-full pointer-events-none">
+                                            <div className="w-5 h-5 rounded-full border shadow-sm bg-gradient-to-br from-red-400 via-green-400 to-blue-400" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </FormControl>
                         <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-            </div>
+                    </FormItem>
+                )}
+            />
+
             <FormField
               control={form.control}
               name="description"
@@ -202,7 +238,7 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                             name={`schedule.${index}.days`}
                             render={({ field: daysField }) => (
                                 <FormItem>
-                                <FormLabel>Days</FormLabel>
+                                <FormLabel className="text-xs">Days</FormLabel>
                                 <div className="flex flex-wrap gap-x-4 gap-y-2 pt-1">
                                     {daysOfWeek.map((day) => (
                                         <div key={day} className="flex items-center space-x-2">
@@ -216,7 +252,7 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                                                         : daysField.onChange(currentDays.filter((value) => value !== day));
                                                 }}
                                             />
-                                            <label htmlFor={`schedule-${index}-day-${day}`} className="text-sm font-normal cursor-pointer select-none">
+                                            <label htmlFor={`schedule-${index}-day-${day}`} className="text-xs font-normal cursor-pointer select-none">
                                                 {day}
                                             </label>
                                         </div>
@@ -233,9 +269,9 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                                 name={`schedule.${index}.startTime`}
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Start Time</FormLabel>
+                                        <FormLabel className="text-xs">Start Time</FormLabel>
                                         <FormControl>
-                                        <Input type="time" {...field} />
+                                        <Input type="time" {...field} className="h-8 text-xs" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -246,9 +282,9 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                                 name={`schedule.${index}.endTime`}
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>End Time</FormLabel>
+                                        <FormLabel className="text-xs">End Time</FormLabel>
                                         <FormControl>
-                                        <Input type="time" {...field} />
+                                        <Input type="time" {...field} className="h-8 text-xs" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -261,11 +297,11 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
                             name={`schedule.${index}.location`}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Room / Building</FormLabel>
+                                    <FormLabel className="text-xs">Room / Building</FormLabel>
                                     <FormControl>
                                         <div className="relative">
-                                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input placeholder="e.g., Healy Hall, Room 203" className="pl-9" {...field} />
+                                            <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                                            <Input placeholder="e.g., Healy Hall, Room 203" className="pl-8 h-8 text-xs" {...field} />
                                         </div>
                                     </FormControl>
                                     <FormMessage />
@@ -278,15 +314,16 @@ export function AddClassForm({ onSave, classToEdit }: AddClassFormProps) {
              <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                size="sm"
+                className="w-full text-xs"
                 onClick={() => append({ days: [], startTime: '', endTime: '', location: '' })}
             >
-                <PlusCircle className="mr-2 h-4 w-4" />
+                <PlusCircle className="mr-1 h-3 w-3" />
                 Add Another Session
             </Button>
         </div>
 
-        <Button type="submit" className="w-full">{isEditing ? 'Save Changes' : 'Add Class'}</Button>
+        <Button type="submit" className="w-full font-headline">{isEditing ? 'Save Changes' : 'Add Class'}</Button>
       </form>
     </Form>
   );
