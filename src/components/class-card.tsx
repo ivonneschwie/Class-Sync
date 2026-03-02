@@ -10,12 +10,6 @@ type ClassCardProps = {
 };
 
 export function ClassCard({ classInfo }: ClassCardProps) {
-  // Get unique locations to show a summary if multiple exist
-  const uniqueLocations = Array.from(new Set(classInfo.schedule.map(s => s.location)));
-  const locationDisplay = uniqueLocations.length > 1 
-    ? `${uniqueLocations[0]} & others` 
-    : uniqueLocations[0] || 'No location set';
-
   return (
     <Link href={`/class/${classInfo.id}`} className="block h-full group focus:outline-none focus:ring-2 focus:ring-primary rounded-lg">
       <Card 
@@ -31,23 +25,27 @@ export function ClassCard({ classInfo }: ClassCardProps) {
             <User className="mr-2 h-4 w-4 flex-shrink-0" />
             <span>{classInfo.instructor}</span>
           </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
-            <span className="truncate">{locationDisplay}</span>
-          </div>
         </CardContent>
-        <CardFooter className="flex-col items-start bg-muted/50 px-6 py-4 mt-auto gap-3">
+        <CardFooter className="flex-col items-start bg-muted/50 px-6 py-4 mt-auto gap-4">
           {classInfo.schedule.slice(0, 2).map((slot, index) => (
-              <div key={index} className="flex justify-between w-full items-center text-sm">
-                  <div className="flex items-center font-semibold">
-                      <Clock className="mr-2 h-4 w-4" style={{ color: classInfo.accentColor }} />
-                      <span>{slot.startTime}</span>
+              <div key={index} className="flex flex-col w-full gap-1.5">
+                  <div className="flex justify-between w-full items-center text-sm">
+                      <div className="flex items-center font-semibold">
+                          <Clock className="mr-2 h-4 w-4" style={{ color: classInfo.accentColor }} />
+                          <span>{slot.startTime}</span>
+                      </div>
+                      <div className="flex gap-1">
+                          {slot.days.map(day => (
+                              <Badge key={day} variant="secondary" className="px-1.5">{day}</Badge>
+                          ))}
+                      </div>
                   </div>
-                  <div className="flex gap-1">
-                      {slot.days.map(day => (
-                          <Badge key={day} variant="secondary" className="px-1.5">{day}</Badge>
-                      ))}
-                  </div>
+                  {slot.location && (
+                      <div className="flex items-center text-[11px] text-muted-foreground ml-6">
+                          <MapPin className="mr-1.5 h-3 w-3" />
+                          <span className="truncate">{slot.location}</span>
+                      </div>
+                  )}
               </div>
           ))}
           {classInfo.schedule.length > 2 && (
