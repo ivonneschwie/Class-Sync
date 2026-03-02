@@ -2,29 +2,35 @@
 
 Manage your school schedule, find study groups, and summarize notes with AI.
 
-## Getting Started
+## GitHub Authentication Troubleshooting
 
-To get started, take a look at `src/app/page.tsx`.
+If you see an error like `remote: Invalid username or token` when trying to push your code, follow these steps:
 
-## GitHub Authentication
+### The Reliable Method: Personal Access Token (PAT)
+GitHub no longer accepts your account password for Git operations. You must use a token instead.
 
-### Option 1: VS Code Built-in (Recommended)
-If you don't see the Accounts icon in the bottom-left, use the Command Palette:
-1. **Open Command Palette:** Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac).
-2. **Search:** Type **"GitHub: Sign In"** and select it.
-3. **Authorize:** Follow the browser prompts to link your account. 
-4. VS Code will now handle your Git credentials automatically.
+1. **Generate Your Token:**
+   - Go to GitHub.com and sign in.
+   - Click your profile photo (top right) -> **Settings**.
+   - On the left sidebar, scroll to the bottom and click **Developer settings**.
+   - Click **Personal access tokens** -> **Tokens (classic)**.
+   - Click **Generate new token** -> **Generate new token (classic)**.
+   - **Note:** "ClassSync-Studio"
+   - **Expiration:** 90 days (or "No expiration" for convenience).
+   - **Scopes:** Check the box for **repo**.
+   - Scroll to the bottom and click **Generate token**.
+   - **Copy the token immediately.** You will not be able to see it again.
 
-### Option 2: Personal Access Token (Manual)
-If you are still prompted for a password in the terminal:
-1. Log in to your GitHub account.
-2. Click your profile photo (top-right) > **Settings**.
-3. Scroll down on the left sidebar > **Developer settings**.
-4. Left sidebar > **Personal access tokens** > **Tokens (classic)**.
-5. Click **Generate new token** > **Generate new token (classic)**.
-6. Give it a note (e.g., "ClassSync Token") and select the **repo** scope.
-7. Click **Generate token** and **copy it immediately**.
-8. Use this token as your **password** when the terminal asks for it.
+2. **Use the Token in VS Code:**
+   - Run your git command (e.g., `git push origin main`).
+   - When prompted for a **Username**, type your GitHub username.
+   - When prompted for a **Password**, **PASTE THE TOKEN** you just copied. 
+   - *Note: The terminal won't show any characters while you paste. Just paste and hit Enter.*
+
+### If you want VS Code to handle it automatically:
+- Look at the bottom-left corner of VS Code for the **Accounts** icon (a small person silhouette). 
+- If you don't see it, right-click any icon on the far-left sidebar (like the Explorer or Search icons) and make sure **Accounts** is checked in the menu.
+- Click the Accounts icon and select **Sign in to Sync Settings** or **Sign in with GitHub**.
 
 ## Features
 - **Schedule Management**: Keep track of your weekly classes.
