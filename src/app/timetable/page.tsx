@@ -114,7 +114,7 @@ export default function TimetablePage() {
                           <span className="text-sm uppercase tracking-wider">{item.durationMinutes} min break</span>
                         </div>
                         <Separator orientation="vertical" className="h-4 mx-2" />
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {formatTimeToAMPM(item.startTime)} - {formatTimeToAMPM(item.endTime)}
                         </span>
                       </div>
@@ -125,26 +125,26 @@ export default function TimetablePage() {
                   return (
                     <Card key={`${classData.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md" style={{ borderLeftColor: classData.accentColor }}>
                       <CardContent className="p-5">
-                        <div className="flex flex-col gap-3">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                            <h3 className="font-bold text-xl truncate">{classData.name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                        <div className="flex flex-col gap-3 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
+                            <h3 className="font-bold text-xl truncate min-w-0 flex-1" title={classData.name}>{classData.name}</h3>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium shrink-0">
                                 <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight">{classData.code}</span>
-                                <span>• {classData.instructor}</span>
+                                <span className="truncate max-w-[150px]">• {classData.instructor}</span>
                             </div>
                           </div>
                           
-                          <div className="flex items-center flex-wrap gap-y-2 text-muted-foreground font-semibold">
-                            <div className="flex items-center gap-2 pr-4">
+                          <div className="flex items-center flex-wrap gap-y-2 text-muted-foreground font-semibold min-w-0">
+                            <div className="flex items-center gap-2 pr-4 shrink-0">
                               <Clock className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
-                              <span className="text-base">
+                              <span className="text-base whitespace-nowrap">
                                 {formatTimeToAMPM(classData.currentSchedule.startTime)} - {formatTimeToAMPM(classData.currentSchedule.endTime)}
                               </span>
                             </div>
                             
-                            <div className="flex items-center gap-2 pl-4 border-l">
+                            <div className="flex items-center gap-2 pl-4 border-l min-w-0">
                               <MapPin className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
-                              <span className="text-base text-foreground">{classData.currentSchedule.location || 'No location set'}</span>
+                              <span className="text-base text-foreground truncate min-w-0">{classData.currentSchedule.location || 'No location set'}</span>
                             </div>
                           </div>
                         </div>

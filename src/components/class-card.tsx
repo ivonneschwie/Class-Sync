@@ -14,37 +14,37 @@ type ClassCardProps = {
 export function ClassCard({ classInfo }: ClassCardProps) {
   return (
     <Card 
-      className="flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 border-t-[6px] group relative"
+      className="flex flex-col h-full w-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 border-t-[6px] group relative overflow-hidden"
       style={{ borderTopColor: classInfo.accentColor }}
     >
-      <Link href={`/class/${classInfo.id}`} className="flex flex-col flex-grow focus:outline-none rounded-lg h-full">
-        <CardHeader className="pb-4">
-          <div className="flex justify-between items-start">
+      <Link href={`/class/${classInfo.id}`} className="flex flex-col flex-grow focus:outline-none rounded-lg h-full min-w-0">
+        <CardHeader className="pb-4 shrink-0">
+          <div className="flex justify-between items-start gap-2 min-w-0">
             <div className="min-w-0 flex-1">
-              <CardTitle className="font-headline text-2xl mb-1 truncate">{classInfo.name}</CardTitle>
-              <CardDescription className="text-lg font-medium">{classInfo.code}</CardDescription>
+              <CardTitle className="font-headline text-2xl mb-1 truncate" title={classInfo.name}>{classInfo.name}</CardTitle>
+              <CardDescription className="text-lg font-medium truncate">{classInfo.code}</CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-grow space-y-4">
-          <div className="flex items-center text-lg text-muted-foreground">
+        <CardContent className="flex-grow space-y-4 min-w-0">
+          <div className="flex items-center text-lg text-muted-foreground min-w-0">
             <User className="mr-3 h-5 w-5 flex-shrink-0" />
-            <span className="font-medium truncate">{classInfo.instructor}</span>
+            <span className="font-medium truncate min-w-0">{classInfo.instructor}</span>
           </div>
         </CardContent>
       </Link>
 
-      <CardFooter className="flex-col items-start bg-muted/50 px-6 py-4 mt-auto gap-4">
+      <CardFooter className="flex-col items-start bg-muted/50 px-6 py-4 mt-auto gap-4 min-w-0">
         {classInfo.schedule.slice(0, 2).map((slot, index) => (
-            <div key={index} className="flex flex-col w-full gap-1.5">
-                <div className="flex justify-between w-full items-center text-sm gap-2">
-                    <div className="flex items-center font-semibold gap-2 overflow-hidden">
+            <div key={index} className="flex flex-col w-full gap-1.5 min-w-0">
+                <div className="flex justify-between w-full items-center text-sm gap-2 min-w-0">
+                    <div className="flex items-center font-semibold gap-2 overflow-hidden min-w-0 flex-1">
                         <div className="flex items-center shrink-0">
                             <Clock className="mr-1.5 h-4 w-4" style={{ color: classInfo.accentColor }} />
-                            <span>{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
+                            <span className="whitespace-nowrap">{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
                         </div>
                         {slot.location && (
-                            <div className="flex items-center text-[11px] text-muted-foreground font-normal border-l border-muted-foreground/30 pl-2 shrink overflow-hidden">
+                            <div className="flex items-center text-[11px] text-muted-foreground font-normal border-l border-muted-foreground/30 pl-2 shrink min-w-0 overflow-hidden">
                                 <MapPin className="mr-1 h-3 w-3 shrink-0" />
                                 <span className="truncate">{slot.location}</span>
                             </div>
