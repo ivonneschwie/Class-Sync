@@ -13,7 +13,7 @@ export default function LessonCatalogPage() {
             Review your past summaries here, organized like a digital notebook.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
           <RedeemCodeDialog expectedType="summary" />
         </div>
       </div>

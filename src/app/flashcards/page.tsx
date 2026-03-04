@@ -58,7 +58,7 @@ export default function FlashcardsPage() {
             Review your saved decks or create a new one.
             </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
             <RedeemCodeDialog expectedType="deck" />
             <Dialog open={createDeckOpen} onOpenChange={setCreateDeckOpen}>
                 <DialogTrigger asChild>
