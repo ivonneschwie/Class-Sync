@@ -57,7 +57,7 @@ export type UserProfile = {
 
 export type SharedItem = {
   id: string; // The share code
-  type: 'summary' | 'deck';
+  type: 'summary' | 'deck' | 'class' | 'schedule';
   data: any; // The actual content
   originalId: string; // The original document ID
   createdBy: string;

@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState } from 'react';
-import { PlusCircle, AlertTriangle } from 'lucide-react';
+import { PlusCircle, AlertTriangle, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -10,6 +11,8 @@ import type { Class } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { ClassCard } from '@/components/class-card';
 import { useClasses } from '@/context/classes-context';
+import { ShareButton } from '@/components/share-button';
+import { RedeemCodeDialog } from '@/components/redeem-code-dialog';
 
 export default function SchedulePage() {
   const { classes, addClass } = useClasses();
@@ -53,15 +56,28 @@ export default function SchedulePage() {
   
   const sortedClasses = [...classes].sort((a, b) => a.schedule[0].startTime.localeCompare(b.schedule[0].startTime));
 
+  // Prepare full schedule data for sharing
+  const fullScheduleData = {
+    id: 'bulk-schedule',
+    classes: classes.map(({ id, userId, createdAt, ...rest }) => rest)
+  };
+
   return (
     <>
       <div className="space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold font-headline tracking-tight">My Schedule</h1>
             <p className="text-xl text-muted-foreground">Your weekly class overview.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <RedeemCodeDialog expectedType="schedule" />
+            {classes.length > 0 && (
+              <ShareButton type="schedule" data={fullScheduleData} className="h-11 px-6">
+                <Share2 className="mr-2 h-4 w-4" />
+                Share All
+              </ShareButton>
+            )}
             <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto text-base h-11 px-6">
                 <PlusCircle className="mr-2 h-5 w-5" />
                 Add Class
@@ -90,10 +106,13 @@ export default function SchedulePage() {
                   </CardDescription>
               </CardHeader>
               <CardContent className="mt-4">
-                  <Button onClick={() => setIsAddDialogOpen(true)} size="lg" className="text-base h-12 px-8">
-                    <PlusCircle className="mr-2 h-5 w-5" />
-                    Add Class
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <RedeemCodeDialog expectedType="schedule" />
+                    <Button onClick={() => setIsAddDialogOpen(true)} size="lg" className="text-base h-12 px-8">
+                      <PlusCircle className="mr-2 h-5 w-5" />
+                      Add Class
+                    </Button>
+                  </div>
               </CardContent>
           </Card>
         )}
