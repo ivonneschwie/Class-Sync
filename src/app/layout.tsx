@@ -10,6 +10,9 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'ClassSync',
   description: 'Manage your school schedule, find study groups, and summarize notes with AI.',
+  icons: {
+    icon: '/ClassSyncLogo.png',
+  },
 };
 
 export default function RootLayout({
