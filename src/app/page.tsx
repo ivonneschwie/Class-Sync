@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -70,15 +69,15 @@ export default function SchedulePage() {
             <h1 className="text-4xl font-bold font-headline tracking-tight">My Schedule</h1>
             <p className="text-xl text-muted-foreground">Your weekly class overview.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <RedeemCodeDialog expectedType="schedule" />
             {classes.length > 0 && (
-              <ShareButton type="schedule" data={fullScheduleData} className="h-11 px-6">
+              <ShareButton type="schedule" data={fullScheduleData} className="flex-1 sm:flex-initial h-11 px-4">
                 <Share2 className="mr-2 h-4 w-4" />
                 Share All
               </ShareButton>
             )}
-            <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto text-base h-11 px-6">
+            <Button onClick={() => setIsAddDialogOpen(true)} className="flex-1 sm:flex-initial text-base h-11 px-4">
                 <PlusCircle className="mr-2 h-5 w-5" />
                 Add Class
             </Button>

@@ -41,11 +41,12 @@ export function ShareButton({ type, data, className, children }: ShareButtonProp
     setIsLoading(true);
 
     try {
-      // 1. Check if this user has already shared this specific item
+      // 1. Redundancy Check: See if this user has already shared this specific item
+      // We use the 'originalId' to track if the same item is being shared again
       const q = query(
         collection(firestore, 'shares'),
         where('createdBy', '==', user.uid),
-        where('originalId', '==', data.id),
+        where('originalId', '==', data.id || 'bulk-schedule'),
         where('type', '==', type),
         limit(1)
       );
@@ -65,6 +66,7 @@ export function ShareButton({ type, data, className, children }: ShareButtonProp
       }
 
       // 2. If not found, create a new one
+      // Destructure to remove local-only fields before sharing
       const { id: originalId, userId, createdAt, ...payload } = data;
       
       let code = generateCode();
@@ -87,7 +89,7 @@ export function ShareButton({ type, data, className, children }: ShareButtonProp
       setDocumentNonBlocking(shareRef, {
         type,
         data: payload,
-        originalId: data.id,
+        originalId: data.id || 'bulk-schedule',
         createdBy: user.uid,
         createdAt: serverTimestamp(),
       }, { merge: true });
