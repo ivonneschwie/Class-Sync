@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -7,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { User, MapPin, Clock } from 'lucide-react';
 import type { Class } from '@/lib/types';
 import { formatTimeToAMPM } from '@/lib/time-utils';
-import { ShareButton } from './share-button';
 
 type ClassCardProps = {
   classInfo: Class;
@@ -35,10 +33,6 @@ export function ClassCard({ classInfo }: ClassCardProps) {
           </div>
         </CardContent>
       </Link>
-
-      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-        <ShareButton type="class" data={classInfo} className="h-8 w-auto px-2 text-xs" />
-      </div>
 
       <CardFooter className="flex-col items-start bg-muted/50 px-6 py-4 mt-auto gap-4">
         {classInfo.schedule.slice(0, 2).map((slot, index) => (

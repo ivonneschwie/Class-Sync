@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useClasses } from '@/context/classes-context';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, MapPin, Clock, CalendarDays, Edit, Trash2, FileText } from 'lucide-react';
+import { ArrowLeft, User, MapPin, Clock, CalendarDays, Edit, Trash2, FileText, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -15,6 +15,7 @@ import type { Class } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { formatTimeToAMPM } from '@/lib/time-utils';
+import { ShareButton } from '@/components/share-button';
 
 const dayLabels: Record<string, string> = {
   'M': 'Monday',
@@ -106,7 +107,10 @@ export default function ClassDetailsPage() {
             Back to Schedule
         </Button>
         <div className="flex gap-2">
-            <Button onClick={() => setIsEditDialogOpen(true)}>
+            <ShareButton type="class" data={classInfo}>
+              <Share2 className="mr-2 h-4 w-4" /> Share
+            </ShareButton>
+            <Button variant="secondary" onClick={() => setIsEditDialogOpen(true)}>
                 <Edit className="mr-2 h-4 w-4" /> Edit
             </Button>
             <AlertDialog>

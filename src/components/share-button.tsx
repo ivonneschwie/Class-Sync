@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -13,12 +12,13 @@ import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { cn } from '@/lib/utils';
 
 interface ShareButtonProps {
-  type: 'summary' | 'deck';
+  type: 'summary' | 'deck' | 'class' | 'schedule';
   data: any;
   className?: string;
+  children?: React.ReactNode;
 }
 
-export function ShareButton({ type, data, className }: ShareButtonProps) {
+export function ShareButton({ type, data, className, children }: ShareButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
@@ -120,29 +120,31 @@ export function ShareButton({ type, data, className }: ShareButtonProps) {
     });
   };
 
-  const onOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
-      // Don't reset shareCode immediately so it persists if they reopen same item
-      // but usually we want a fresh state for DIFFERENT items
+  const getTitle = () => {
+    switch (type) {
+        case 'summary': return 'Lesson';
+        case 'deck': return 'Deck';
+        case 'class': return 'Class';
+        case 'schedule': return 'Full Schedule';
+        default: return 'Resource';
     }
-  };
+  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className={cn("gap-2", className)} onClick={(e) => {
-            // Reset share code if we are opening a different item than what was previously cached
-            // However, since ShareButton is usually unique per item in the list, 
-            // the state is already scoped to that item.
-        }}>
-          <Share2 className="h-4 w-4" />
-          Share
+        <Button variant="outline" size="sm" className={cn("gap-2", className)}>
+          {children || (
+            <>
+              <Share2 className="h-4 w-4" />
+              Share
+            </>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share {type === 'summary' ? 'Lesson' : 'Deck'}</DialogTitle>
+          <DialogTitle>Share {getTitle()}</DialogTitle>
           <DialogDescription>
             Create a unique short code that others can use to import this content.
           </DialogDescription>
@@ -174,7 +176,7 @@ export function ShareButton({ type, data, className }: ShareButtonProps) {
                 </Button>
               </div>
               <p className="text-sm text-center text-muted-foreground">
-                Give this code to your classmate. They can use the "Import" button in their Lesson Catalog.
+                Give this code to your classmate. They can use the "Import" button in their sidebar or respective dashboard.
               </p>
               <Button variant="ghost" className="w-full text-xs" onClick={() => setShareCode(null)}>
                 Generate a different code?
