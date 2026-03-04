@@ -31,7 +31,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-
 const navItems = [
   {
     href: '/',
@@ -75,6 +74,49 @@ const accountNavItems = [
     { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
+function AppSidebar() {
+  const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
+  return (
+    <Sidebar collapsible="icon" className="border-r">
+        <SidebarHeader>
+             <SidebarMenuButton asChild className="h-auto">
+                <Link href="/" className="flex items-center gap-2 font-headline font-semibold text-lg p-2" onClick={handleLinkClick}>
+                    <Logo className="h-6 w-6 text-primary" />
+                    <span className="group-data-[collapsible=icon]:hidden">ClassSync</span>
+                </Link>
+             </SidebarMenuButton>
+        </SidebarHeader>
+        <SidebarContent>
+            <SidebarMenu>
+                {navItems.map((item) => (
+                    !['/profile', '/settings'].includes(item.href) && (
+                        <SidebarMenuItem key={item.href}>
+                            <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
+                                <Link href={item.href} onClick={handleLinkClick}>
+                                    <item.icon />
+                                    <span>{item.label}</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )
+                ))}
+            </SidebarMenu>
+        </SidebarContent>
+        <SidebarFooter>
+            <AccountDropdown />
+        </SidebarFooter>
+    </Sidebar>
+  );
+}
+
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -105,35 +147,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-        <Sidebar collapsible="icon" className="border-r">
-            <SidebarHeader>
-                 <SidebarMenuButton asChild className="h-auto">
-                    <Link href="/" className="flex items-center gap-2 font-headline font-semibold text-lg p-2">
-                        <Logo className="h-6 w-6 text-primary" />
-                        <span className="group-data-[collapsible=icon]:hidden">ClassSync</span>
-                    </Link>
-                 </SidebarMenuButton>
-            </SidebarHeader>
-            <SidebarContent>
-                <SidebarMenu>
-                    {navItems.map((item) => (
-                        !['/profile', '/settings'].includes(item.href) && (
-                            <SidebarMenuItem key={item.href}>
-                                <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
-                                    <Link href={item.href}>
-                                        <item.icon />
-                                        <span>{item.label}</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        )
-                    ))}
-                </SidebarMenu>
-            </SidebarContent>
-            <SidebarFooter>
-                <AccountDropdown />
-            </SidebarFooter>
-        </Sidebar>
+        <AppSidebar />
         <SidebarInset className="bg-muted/20">
             <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden">
                 <SidebarTrigger />
@@ -154,7 +168,7 @@ function AccountDropdown() {
   const auth = useAuth();
   const { user } = useUser();
   const { profile, isLoading } = useProfile();
-  const { state: sidebarState } = useSidebar();
+  const { state: sidebarState, isMobile, setOpenMobile } = useSidebar();
   const router = useRouter();
 
   if (isLoading) {
@@ -166,6 +180,13 @@ function AccountDropdown() {
     )
   }
 
+  const handleItemClick = (href: string) => {
+    router.push(href);
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   }
@@ -175,7 +196,7 @@ function AccountDropdown() {
         <DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {accountNavItems.map(item => (
-            <DropdownMenuItem key={item.href} onClick={() => router.push(item.href)}>
+            <DropdownMenuItem key={item.href} onClick={() => handleItemClick(item.href)}>
                 <item.icon />
                 <span>{item.label}</span>
             </DropdownMenuItem>
@@ -188,7 +209,7 @@ function AccountDropdown() {
     </DropdownMenuContent>
   );
 
-  if (sidebarState === 'collapsed') {
+  if (sidebarState === 'collapsed' && !isMobile) {
       return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
