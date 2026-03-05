@@ -97,7 +97,7 @@ export default function TimetablePage() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-          <div className="mt-6 min-w-0 px-2 md:px-0">
+          <div className="mt-6 min-w-0 px-2 md:px-0 overflow-x-hidden">
             <h2 className="text-2xl font-bold font-headline mb-6 flex items-center gap-3">
               <CalendarDays className="h-6 w-6 text-primary" />
               {dayLabels[activeDay]}
@@ -124,17 +124,17 @@ export default function TimetablePage() {
                   const classData = item.data;
                   return (
                     <Card key={`${classData.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md min-w-0 w-full max-w-full" style={{ borderLeftColor: classData.accentColor }}>
-                      <CardContent className="p-5">
-                        <div className="flex flex-col gap-3 min-w-0">
+                      <CardContent className="p-5 overflow-hidden">
+                        <div className="flex flex-col gap-3 min-w-0 overflow-hidden">
                           <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 overflow-hidden">
                             <h3 className="font-bold text-xl truncate min-w-0 flex-1" title={classData.name}>{classData.name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium shrink-0 min-w-0">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium shrink-0 min-w-0 overflow-hidden">
                                 <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight shrink-0">{classData.code}</span>
                                 <span className="truncate max-w-[120px] sm:max-w-[200px]">• {classData.instructor}</span>
                             </div>
                           </div>
                           
-                          <div className="flex items-center flex-wrap gap-y-2 text-muted-foreground font-semibold min-w-0">
+                          <div className="flex items-center flex-wrap gap-y-2 text-muted-foreground font-semibold min-w-0 overflow-hidden">
                             <div className="flex items-center gap-2 pr-4 shrink-0">
                               <Clock className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
                               <span className="text-base whitespace-nowrap">
