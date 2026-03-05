@@ -74,13 +74,13 @@ export default function TimetablePage() {
   }, [classes, activeDay]);
 
   return (
-    <div className="flex flex-col h-full gap-6 max-w-4xl mx-auto w-full px-1 md:px-0 overflow-hidden">
-      <div className="space-y-1 shrink-0">
+    <div className="flex flex-col h-full gap-6 max-w-4xl mx-auto w-full px-1 md:px-0 overflow-x-hidden">
+      <div className="space-y-1 shrink-0 px-2 md:px-0">
         <h1 className="text-3xl font-bold font-headline tracking-tight">Time Table</h1>
         <p className="text-muted-foreground text-lg">Your daily schedule at a glance.</p>
       </div>
 
-      <div className="flex flex-col flex-1 gap-4 min-w-0 overflow-hidden">
+      <div className="flex flex-col flex-1 gap-4 min-w-0 overflow-x-hidden">
         <Tabs value={activeDay} onValueChange={setActiveDay} className="w-full">
           <ScrollArea className="w-full whitespace-nowrap pb-2">
             <TabsList className="inline-flex w-full justify-start md:justify-center p-1 bg-muted/50 h-auto min-w-full gap-1">
@@ -97,18 +97,18 @@ export default function TimetablePage() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-          <div className="mt-6 min-w-0">
+          <div className="mt-6 min-w-0 px-2 md:px-0">
             <h2 className="text-2xl font-bold font-headline mb-6 flex items-center gap-3">
               <CalendarDays className="h-6 w-6 text-primary" />
               {dayLabels[activeDay]}
             </h2>
 
             {dayItems.length > 0 ? (
-              <div className="space-y-4 min-w-0">
+              <div className="space-y-4 min-w-0 max-w-full">
                 {dayItems.map((item, idx) => {
                   if (item.type === 'break') {
                     return (
-                      <div key={`break-${idx}`} className="flex items-center gap-4 px-5 py-3 border-2 border-dashed rounded-xl bg-muted/20 opacity-70 min-w-0">
+                      <div key={`break-${idx}`} className="flex items-center gap-4 px-5 py-3 border-2 border-dashed rounded-xl bg-muted/20 opacity-70 min-w-0 max-w-full">
                         <div className="flex items-center gap-2 text-muted-foreground font-semibold shrink-0">
                           <Coffee className="h-4 w-4" />
                           <span className="text-sm uppercase tracking-wider">{item.durationMinutes} min break</span>
@@ -123,10 +123,10 @@ export default function TimetablePage() {
 
                   const classData = item.data;
                   return (
-                    <Card key={`${classData.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md min-w-0 w-full" style={{ borderLeftColor: classData.accentColor }}>
+                    <Card key={`${classData.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md min-w-0 w-full max-w-full" style={{ borderLeftColor: classData.accentColor }}>
                       <CardContent className="p-5">
                         <div className="flex flex-col gap-3 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 overflow-hidden">
                             <h3 className="font-bold text-xl truncate min-w-0 flex-1" title={classData.name}>{classData.name}</h3>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium shrink-0 min-w-0">
                                 <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight shrink-0">{classData.code}</span>
