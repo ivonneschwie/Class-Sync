@@ -143,8 +143,8 @@ export default function ClassDetailsPage() {
         </div>
        </div>
 
-      <Card className="overflow-hidden w-full min-w-0">
-        <CardHeader className="border-b-4 pb-3 min-w-0" style={{ borderColor: classInfo.accentColor }}>
+      <Card className="overflow-hidden w-full min-w-0 shadow-md">
+        <CardHeader className="border-b-4 p-4 md:p-6 min-w-0" style={{ borderColor: classInfo.accentColor }}>
           <CardTitle className="font-headline text-2xl md:text-3xl break-all leading-tight">
             {classInfo.name}
           </CardTitle>
@@ -152,7 +152,7 @@ export default function ClassDetailsPage() {
             {classInfo.code}
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-5 space-y-4 min-w-0">
+        <CardContent className="p-4 md:p-6 space-y-4 min-w-0">
           <div className="flex items-start text-muted-foreground min-w-0">
             <User className="mr-3 h-5 w-5 flex-shrink-0 mt-0.5" />
             <div className="flex flex-col min-w-0 flex-1">
@@ -175,7 +175,7 @@ export default function ClassDetailsPage() {
             </>
           )}
         </CardContent>
-        <CardFooter className="flex-col items-start gap-3 bg-muted/30 p-4 md:p-6 min-w-0">
+        <CardFooter className="flex-col items-start gap-3 bg-muted/30 p-4 md:p-6 border-t min-w-0">
             <h3 className="font-headline flex items-center text-lg md:text-xl mb-1 shrink-0">
               <CalendarDays className="mr-2 h-5 w-5 text-primary"/> Sessions
             </h3>

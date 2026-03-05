@@ -74,9 +74,9 @@ export default function TimetablePage() {
   }, [classes, activeDay]);
 
   return (
-    <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 py-6 md:px-0 overflow-x-hidden">
+    <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 py-4 md:px-0 overflow-x-hidden">
       {/* Header section with strict containment */}
-      <div className="mb-6 shrink-0 min-w-0 w-full overflow-hidden">
+      <div className="mb-4 shrink-0 min-w-0 w-full overflow-hidden">
         <h1 className="text-3xl font-bold font-headline tracking-tight truncate">Time Table</h1>
         <p className="text-muted-foreground text-lg truncate">Your daily schedule at a glance.</p>
       </div>
@@ -85,7 +85,7 @@ export default function TimetablePage() {
       <div className="flex flex-col flex-1 min-w-0 w-full overflow-hidden">
         <Tabs value={activeDay} onValueChange={setActiveDay} className="w-full">
           {/* Compact Day Selector */}
-          <ScrollArea className="w-full rounded-md border bg-muted/30 p-1 mb-6">
+          <ScrollArea className="w-full rounded-md border bg-muted/30 p-1 mb-4">
             <TabsList className="flex h-10 w-full bg-transparent p-0">
               {orderedDays.map(day => (
                 <TabsTrigger 
@@ -101,18 +101,18 @@ export default function TimetablePage() {
           </ScrollArea>
 
           {/* Daily Schedule Content */}
-          <div className="space-y-6 w-full min-w-0 overflow-hidden">
+          <div className="space-y-4 w-full min-w-0 overflow-hidden">
             <h2 className="text-2xl font-bold font-headline flex items-center gap-3 truncate">
               <CalendarDays className="h-6 w-6 text-primary shrink-0" />
               {dayLabels[activeDay]}
             </h2>
 
             {dayItems.length > 0 ? (
-              <div className="grid gap-4 w-full min-w-0 overflow-hidden">
+              <div className="grid gap-3 w-full min-w-0 overflow-hidden">
                 {dayItems.map((item, idx) => {
                   if (item.type === 'break') {
                     return (
-                      <div key={`break-${idx}`} className="flex items-center gap-3 px-4 py-2 border-2 border-dashed rounded-lg bg-muted/10 opacity-60 w-full min-w-0 overflow-hidden">
+                      <div key={`break-${idx}`} className="flex items-center gap-3 px-3 py-1.5 border-2 border-dashed rounded-lg bg-muted/10 opacity-60 w-full min-w-0 overflow-hidden">
                         <Coffee className="h-4 w-4 shrink-0 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                           {item.durationMinutes} min break
@@ -132,7 +132,7 @@ export default function TimetablePage() {
                       className="border-l-[6px] w-full min-w-0 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                       style={{ borderLeftColor: classData.accentColor }}
                     >
-                      <CardContent className="p-4 sm:p-5 flex flex-col gap-2 min-w-0 overflow-hidden">
+                      <CardContent className="p-3 sm:p-4 flex flex-col gap-2 min-w-0 overflow-hidden">
                         {/* Title & Code Row */}
                         <div className="flex items-start justify-between gap-3 min-w-0 overflow-hidden">
                           <h3 className="font-bold text-lg sm:text-xl truncate flex-1 leading-tight" title={classData.name}>
