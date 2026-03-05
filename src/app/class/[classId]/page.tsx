@@ -9,7 +9,17 @@ import { ArrowLeft, User, MapPin, Clock, CalendarDays, Edit, Trash2, FileText } 
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle,
+  AlertDialogTrigger 
+} from '@/components/ui/alert-dialog';
 import { AddClassForm } from '@/components/add-class-form';
 import type { Class } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -133,7 +143,7 @@ export default function ClassDetailsPage() {
         </div>
        </div>
 
-      <Card className="overflow-hidden w-full">
+      <Card className="overflow-hidden w-full min-w-0">
         <CardHeader className="border-b-4 pb-4 min-w-0" style={{ borderColor: classInfo.accentColor }}>
           <CardTitle className="font-headline text-3xl md:text-4xl break-all leading-tight">
             {classInfo.name}
