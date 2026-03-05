@@ -165,7 +165,7 @@ export default function ClassDetailsPage() {
                 <span className="text-foreground text-base break-all font-medium">{classInfo.instructor}</span>
 =======
       <Card className="overflow-hidden w-full min-w-0">
-        <CardHeader className="px-4 sm:px-6 border-b-4 pb-4 min-w-0" style={{ borderColor: classInfo.accentColor }}>
+        <CardHeader className="px-3 sm:px-5 border-b-4 pb-4 min-w-0" style={{ borderColor: classInfo.accentColor }}>
           <CardTitle className="font-headline text-2xl md:text-4xl break-all leading-tight">
             {classInfo.name}
           </CardTitle>
@@ -173,7 +173,7 @@ export default function ClassDetailsPage() {
             {classInfo.code}
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-4 sm:px-6 pt-6 space-y-6 min-w-0">
+        <CardContent className="px-3 sm:px-5 pt-6 space-y-6 min-w-0">
           <div className="flex items-start text-lg md:text-xl text-muted-foreground min-w-0">
             <User className="mr-3 h-5 w-5 flex-shrink-0 mt-1" />
             <div className="flex flex-col min-w-0 flex-1">
