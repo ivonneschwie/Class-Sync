@@ -74,7 +74,11 @@ export default function TimetablePage() {
   }, [classes, activeDay]);
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 py-4 md:px-0 overflow-x-hidden">
+=======
+    <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-2 py-6 md:px-0 overflow-x-hidden">
+>>>>>>> 2e713f7 (ive rolled it back to version 121e66f, lessen the horizontal margins for)
       {/* Header section with strict containment */}
       <div className="mb-4 shrink-0 min-w-0 w-full overflow-hidden">
         <h1 className="text-3xl font-bold font-headline tracking-tight truncate">Time Table</h1>

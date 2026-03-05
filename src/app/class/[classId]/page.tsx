@@ -109,7 +109,11 @@ export default function ClassDetailsPage() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="space-y-4 max-w-4xl mx-auto w-full px-3 md:px-0 overflow-hidden">
+=======
+    <div className="space-y-6 max-w-4xl mx-auto w-full px-2 md:px-0 overflow-hidden">
+>>>>>>> 2e713f7 (ive rolled it back to version 121e66f, lessen the horizontal margins for)
        <div className="flex flex-col sm:flex-row gap-2 justify-between items-stretch sm:items-center">
          <Button variant="outline" size="sm" onClick={() => router.push('/')} className="w-full sm:w-auto">
             <ArrowLeft className="mr-2 h-4 w-4" />
