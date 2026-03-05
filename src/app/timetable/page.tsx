@@ -74,16 +74,16 @@ export default function TimetablePage() {
   }, [classes, activeDay]);
 
   return (
-    <div className="flex flex-col h-full gap-6 max-w-4xl mx-auto w-full px-1 md:px-0">
+    <div className="flex flex-col h-full gap-6 max-w-4xl mx-auto w-full px-1 md:px-0 overflow-hidden">
       <div className="space-y-1 shrink-0">
         <h1 className="text-3xl font-bold font-headline tracking-tight">Time Table</h1>
         <p className="text-muted-foreground text-lg">Your daily schedule at a glance.</p>
       </div>
 
-      <div className="flex flex-col flex-1 gap-4 overflow-hidden">
+      <div className="flex flex-col flex-1 gap-4 min-w-0 overflow-hidden">
         <Tabs value={activeDay} onValueChange={setActiveDay} className="w-full">
           <ScrollArea className="w-full whitespace-nowrap pb-2">
-            <TabsList className="inline-flex w-full justify-start md:justify-center p-1 bg-muted/50 h-auto">
+            <TabsList className="inline-flex w-full justify-start md:justify-center p-1 bg-muted/50 h-auto min-w-full">
               {orderedDays.map(day => (
                 <TabsTrigger 
                   key={day} 
@@ -97,24 +97,24 @@ export default function TimetablePage() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-          <div className="mt-6">
+          <div className="mt-6 min-w-0">
             <h2 className="text-2xl font-bold font-headline mb-6 flex items-center gap-3">
               <CalendarDays className="h-6 w-6 text-primary" />
               {dayLabels[activeDay]}
             </h2>
 
             {dayItems.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-4 min-w-0">
                 {dayItems.map((item, idx) => {
                   if (item.type === 'break') {
                     return (
-                      <div key={`break-${idx}`} className="flex items-center gap-4 px-5 py-3 border-2 border-dashed rounded-xl bg-muted/20 opacity-70">
-                        <div className="flex items-center gap-2 text-muted-foreground font-semibold">
+                      <div key={`break-${idx}`} className="flex items-center gap-4 px-5 py-3 border-2 border-dashed rounded-xl bg-muted/20 opacity-70 min-w-0">
+                        <div className="flex items-center gap-2 text-muted-foreground font-semibold shrink-0">
                           <Coffee className="h-4 w-4" />
                           <span className="text-sm uppercase tracking-wider">{item.durationMinutes} min break</span>
                         </div>
                         <Separator orientation="vertical" className="h-4 mx-2" />
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">
                           {formatTimeToAMPM(item.startTime)} - {formatTimeToAMPM(item.endTime)}
                         </span>
                       </div>
@@ -123,14 +123,14 @@ export default function TimetablePage() {
 
                   const classData = item.data;
                   return (
-                    <Card key={`${classData.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md" style={{ borderLeftColor: classData.accentColor }}>
+                    <Card key={`${classData.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md min-w-0 w-full" style={{ borderLeftColor: classData.accentColor }}>
                       <CardContent className="p-5">
                         <div className="flex flex-col gap-3 min-w-0">
                           <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
                             <h3 className="font-bold text-xl truncate min-w-0 flex-1" title={classData.name}>{classData.name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium shrink-0">
-                                <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight">{classData.code}</span>
-                                <span className="truncate max-w-[150px]">• {classData.instructor}</span>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium shrink-0 min-w-0">
+                                <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight shrink-0">{classData.code}</span>
+                                <span className="truncate max-w-[120px] sm:max-w-[200px]">• {classData.instructor}</span>
                             </div>
                           </div>
                           
@@ -142,7 +142,7 @@ export default function TimetablePage() {
                               </span>
                             </div>
                             
-                            <div className="flex items-center gap-2 pl-4 border-l min-w-0">
+                            <div className="flex items-center gap-2 pl-4 border-l min-w-0 overflow-hidden">
                               <MapPin className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
                               <span className="text-base text-foreground truncate min-w-0">{classData.currentSchedule.location || 'No location set'}</span>
                             </div>
@@ -154,7 +154,7 @@ export default function TimetablePage() {
                 })}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed rounded-2xl bg-muted/5">
+              <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed rounded-2xl bg-muted/5 min-w-0">
                 <Inbox className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
                 <h3 className="text-xl font-bold font-headline">No Classes Scheduled</h3>
                 <p className="text-muted-foreground text-lg">Enjoy your free time!</p>
