@@ -78,17 +78,18 @@ function AppSidebar() {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
 
-  const handleLinkClick = () => {
+  // Close the sidebar when the pathname changes (i.e., navigation completed)
+  useEffect(() => {
     if (isMobile) {
       setOpenMobile(false);
     }
-  };
+  }, [pathname, isMobile, setOpenMobile]);
 
   return (
     <Sidebar collapsible="icon" className="border-r">
         <SidebarHeader>
              <SidebarMenuButton asChild className="h-auto">
-                <Link href="/" className="flex items-center gap-2 font-headline font-semibold text-lg p-2" onClick={handleLinkClick}>
+                <Link href="/" className="flex items-center gap-2 font-headline font-semibold text-lg p-2">
                     <Logo className="h-6 w-6 text-primary" />
                     <span className="group-data-[collapsible=icon]:hidden">ClassSync</span>
                 </Link>
@@ -100,7 +101,7 @@ function AppSidebar() {
                     !['/profile', '/settings'].includes(item.href) && (
                         <SidebarMenuItem key={item.href}>
                             <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
-                                <Link href={item.href} onClick={handleLinkClick}>
+                                <Link href={item.href}>
                                     <item.icon />
                                     <span>{item.label}</span>
                                 </Link>
@@ -168,7 +169,7 @@ function AccountDropdown() {
   const auth = useAuth();
   const { user } = useUser();
   const { profile, isLoading } = useProfile();
-  const { state: sidebarState, isMobile, setOpenMobile } = useSidebar();
+  const { state: sidebarState, isMobile } = useSidebar();
   const router = useRouter();
 
   if (isLoading) {
@@ -182,9 +183,6 @@ function AccountDropdown() {
 
   const handleItemClick = (href: string) => {
     router.push(href);
-    if (isMobile) {
-      setOpenMobile(false);
-    }
   };
 
   const getInitials = (name: string) => {
