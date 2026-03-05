@@ -2,13 +2,13 @@
 
 import { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Class, ClassSchedule } from '@/lib/types';
 import { useClasses } from '@/context/classes-context';
-import { MapPin, CalendarDays, Inbox, Clock, Coffee } from 'lucide-react';
+import { MapPin, CalendarDays, Inbox, Clock, Coffee, User } from 'lucide-react';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { formatTimeToAMPM } from '@/lib/time-utils';
+import type { Class, ClassSchedule } from '@/lib/types';
 
 const orderedDays: ClassSchedule['days'][number][] = ['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'];
 const dayLabels: Record<string, string> = {
@@ -74,21 +74,24 @@ export default function TimetablePage() {
   }, [classes, activeDay]);
 
   return (
-    <div className="flex flex-col h-full gap-6 max-w-4xl mx-auto w-full px-1 md:px-0 overflow-x-hidden">
-      <div className="space-y-1 shrink-0 px-2 md:px-0">
-        <h1 className="text-3xl font-bold font-headline tracking-tight">Time Table</h1>
-        <p className="text-muted-foreground text-lg">Your daily schedule at a glance.</p>
+    <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 py-6 md:px-0 overflow-x-hidden">
+      {/* Header section with strict containment */}
+      <div className="mb-6 shrink-0 min-w-0 w-full overflow-hidden">
+        <h1 className="text-3xl font-bold font-headline tracking-tight truncate">Time Table</h1>
+        <p className="text-muted-foreground text-lg truncate">Your daily schedule at a glance.</p>
       </div>
 
-      <div className="flex flex-col flex-1 gap-4 min-w-0 overflow-x-hidden">
+      {/* Main interactive area */}
+      <div className="flex flex-col flex-1 min-w-0 w-full overflow-hidden">
         <Tabs value={activeDay} onValueChange={setActiveDay} className="w-full">
-          <ScrollArea className="w-full whitespace-nowrap pb-2">
-            <TabsList className="inline-flex w-full justify-start md:justify-center p-1 bg-muted/50 h-auto min-w-full gap-1">
+          {/* Compact Day Selector */}
+          <ScrollArea className="w-full rounded-md border bg-muted/30 p-1 mb-6">
+            <TabsList className="flex h-10 w-full bg-transparent p-0">
               {orderedDays.map(day => (
                 <TabsTrigger 
                   key={day} 
                   value={day} 
-                  className="flex-1 px-3 py-1.5 text-xs md:text-sm font-bold uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground min-w-[3rem]"
+                  className="flex-1 px-2 py-1.5 text-xs font-bold uppercase data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
                 >
                   {day}
                 </TabsTrigger>
@@ -97,24 +100,25 @@ export default function TimetablePage() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-          <div className="mt-6 min-w-0 px-2 md:px-0 overflow-x-hidden">
-            <h2 className="text-2xl font-bold font-headline mb-6 flex items-center gap-3">
-              <CalendarDays className="h-6 w-6 text-primary" />
+          {/* Daily Schedule Content */}
+          <div className="space-y-6 w-full min-w-0 overflow-hidden">
+            <h2 className="text-2xl font-bold font-headline flex items-center gap-3 truncate">
+              <CalendarDays className="h-6 w-6 text-primary shrink-0" />
               {dayLabels[activeDay]}
             </h2>
 
             {dayItems.length > 0 ? (
-              <div className="space-y-4 min-w-0 max-w-full">
+              <div className="grid gap-4 w-full min-w-0 overflow-hidden">
                 {dayItems.map((item, idx) => {
                   if (item.type === 'break') {
                     return (
-                      <div key={`break-${idx}`} className="flex items-center gap-4 px-5 py-3 border-2 border-dashed rounded-xl bg-muted/20 opacity-70 min-w-0 max-w-full">
-                        <div className="flex items-center gap-2 text-muted-foreground font-semibold shrink-0">
-                          <Coffee className="h-4 w-4" />
-                          <span className="text-sm uppercase tracking-wider">{item.durationMinutes} min break</span>
-                        </div>
-                        <Separator orientation="vertical" className="h-4 mx-2" />
-                        <span className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">
+                      <div key={`break-${idx}`} className="flex items-center gap-3 px-4 py-2 border-2 border-dashed rounded-lg bg-muted/10 opacity-60 w-full min-w-0 overflow-hidden">
+                        <Coffee className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                          {item.durationMinutes} min break
+                        </span>
+                        <Separator orientation="vertical" className="h-4 mx-1" />
+                        <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap">
                           {formatTimeToAMPM(item.startTime)} - {formatTimeToAMPM(item.endTime)}
                         </span>
                       </div>
@@ -123,29 +127,45 @@ export default function TimetablePage() {
 
                   const classData = item.data;
                   return (
-                    <Card key={`${classData.id}-${idx}`} className="border-l-[6px] overflow-hidden transition-all hover:shadow-md min-w-0 w-full max-w-full" style={{ borderLeftColor: classData.accentColor }}>
-                      <CardContent className="p-5 overflow-hidden">
-                        <div className="flex flex-col gap-3 min-w-0 overflow-hidden">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 overflow-hidden">
-                            <h3 className="font-bold text-xl truncate min-w-0 flex-1" title={classData.name}>{classData.name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium shrink-0 min-w-0 overflow-hidden">
-                                <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight shrink-0">{classData.code}</span>
-                                <span className="truncate max-w-[120px] sm:max-w-[200px]">• {classData.instructor}</span>
-                            </div>
+                    <Card 
+                      key={`${classData.id}-${idx}`} 
+                      className="border-l-[6px] w-full min-w-0 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                      style={{ borderLeftColor: classData.accentColor }}
+                    >
+                      <CardContent className="p-4 sm:p-5 flex flex-col gap-2 min-w-0 overflow-hidden">
+                        {/* Title & Code Row */}
+                        <div className="flex items-start justify-between gap-3 min-w-0 overflow-hidden">
+                          <h3 className="font-bold text-lg sm:text-xl truncate flex-1 leading-tight" title={classData.name}>
+                            {classData.name}
+                          </h3>
+                          <span className="shrink-0 bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-tight self-start mt-1">
+                            {classData.code}
+                          </span>
+                        </div>
+                        
+                        {/* Instructor Row */}
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm min-w-0 overflow-hidden">
+                          <User className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate flex-1 min-w-0">{classData.instructor}</span>
+                        </div>
+
+                        {/* Separator to define space */}
+                        <Separator className="my-1" />
+
+                        {/* Time & Location Details */}
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs sm:text-sm font-medium min-w-0 overflow-hidden">
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <Clock className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
+                            <span className="tabular-nums whitespace-nowrap">
+                              {formatTimeToAMPM(classData.currentSchedule.startTime)} - {formatTimeToAMPM(classData.currentSchedule.endTime)}
+                            </span>
                           </div>
                           
-                          <div className="flex items-center flex-wrap gap-y-2 text-muted-foreground font-semibold min-w-0 overflow-hidden">
-                            <div className="flex items-center gap-2 pr-4 shrink-0">
-                              <Clock className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
-                              <span className="text-base whitespace-nowrap">
-                                {formatTimeToAMPM(classData.currentSchedule.startTime)} - {formatTimeToAMPM(classData.currentSchedule.endTime)}
-                              </span>
-                            </div>
-                            
-                            <div className="flex items-center gap-2 pl-4 border-l min-w-0 overflow-hidden">
-                              <MapPin className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
-                              <span className="text-base text-foreground truncate min-w-0">{classData.currentSchedule.location || 'No location set'}</span>
-                            </div>
+                          <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
+                            <MapPin className="h-4 w-4 shrink-0" style={{ color: classData.accentColor }} />
+                            <span className="truncate flex-1 min-w-0" title={classData.currentSchedule.location}>
+                              {classData.currentSchedule.location || 'No location set'}
+                            </span>
                           </div>
                         </div>
                       </CardContent>
@@ -154,10 +174,10 @@ export default function TimetablePage() {
                 })}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed rounded-2xl bg-muted/5 min-w-0">
+              <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed rounded-xl bg-muted/5 w-full">
                 <Inbox className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
                 <h3 className="text-xl font-bold font-headline">No Classes Scheduled</h3>
-                <p className="text-muted-foreground text-lg">Enjoy your free time!</p>
+                <p className="text-muted-foreground">Enjoy your free time!</p>
               </div>
             )}
           </div>
