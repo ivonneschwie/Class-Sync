@@ -9,7 +9,7 @@ import { ArrowLeft, User, MapPin, Clock, CalendarDays, Edit, Trash2, FileText } 
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { AddClassForm } from '@/components/add-class-form';
 import type { Class } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -134,20 +134,20 @@ export default function ClassDetailsPage() {
        </div>
 
       <Card className="overflow-hidden w-full">
-        <CardHeader className="border-b-4 pb-4" style={{ borderColor: classInfo.accentColor }}>
-          <CardTitle className="font-headline text-3xl md:text-4xl break-words leading-tight">
+        <CardHeader className="border-b-4 pb-4 min-w-0" style={{ borderColor: classInfo.accentColor }}>
+          <CardTitle className="font-headline text-3xl md:text-4xl break-all leading-tight">
             {classInfo.name}
           </CardTitle>
-          <CardDescription className="text-lg md:text-xl pt-1 break-words">
+          <CardDescription className="text-lg md:text-xl pt-1 break-all">
             {classInfo.code}
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-8 space-y-6">
+        <CardContent className="pt-8 space-y-6 min-w-0">
           <div className="flex items-start text-lg md:text-xl text-muted-foreground min-w-0">
             <User className="mr-4 h-6 w-6 flex-shrink-0 mt-0.5" />
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 flex-1">
                 <span className="font-semibold text-sm uppercase tracking-wider mb-1">Instructor</span>
-                <span className="text-foreground break-words">{classInfo.instructor}</span>
+                <span className="text-foreground break-all">{classInfo.instructor}</span>
             </div>
           </div>
           {classInfo.description && (
@@ -157,7 +157,7 @@ export default function ClassDetailsPage() {
                 <FileText className="mr-4 h-6 w-6 flex-shrink-0 mt-0.5" />
                 <div className="space-y-2 min-w-0 flex-1">
                   <span className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Description</span>
-                  <p className="text-base md:text-lg text-foreground whitespace-pre-wrap leading-relaxed break-words">
+                  <p className="text-base md:text-lg text-foreground whitespace-pre-wrap leading-relaxed break-all">
                     {classInfo.description}
                   </p>
                 </div>
@@ -169,18 +169,18 @@ export default function ClassDetailsPage() {
             <h3 className="font-headline flex items-center text-xl md:text-2xl mb-2 shrink-0">
               <CalendarDays className="mr-3 h-6 w-6 text-primary"/> Sessions & Rooms
             </h3>
-            <div className="grid gap-4 w-full">
+            <div className="grid gap-4 w-full min-w-0">
                 {classInfo.schedule.map((slot, index) => (
                     <div key={index} className="flex flex-col w-full rounded-xl border bg-background p-4 md:p-5 gap-4 shadow-sm min-w-0 overflow-hidden">
                         <div className="flex flex-col gap-3 min-w-0">
-                            <div className="flex items-center font-bold text-base md:text-lg min-w-0 flex-wrap gap-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center font-bold text-base md:text-lg min-w-0 gap-2">
                                 <div className="flex items-center shrink-0">
                                     <Clock className="mr-3 h-5 w-5 shrink-0" style={{ color: classInfo.accentColor }} />
                                     <span className="whitespace-nowrap">{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
                                 </div>
-                                <div className="flex items-center text-muted-foreground font-medium min-w-0 break-words">
+                                <div className="flex items-center text-muted-foreground font-medium min-w-0 flex-1">
                                     <MapPin className="mr-2 h-4 w-4 shrink-0" style={{ color: classInfo.accentColor }} />
-                                    <span className="break-words">{slot.location}</span>
+                                    <span className="break-all">{slot.location}</span>
                                 </div>
                             </div>
                             <div className="flex gap-2 flex-wrap shrink-0">
