@@ -83,12 +83,12 @@ export default function TimetablePage() {
       <div className="flex flex-col flex-1 gap-4 min-w-0 overflow-hidden">
         <Tabs value={activeDay} onValueChange={setActiveDay} className="w-full">
           <ScrollArea className="w-full whitespace-nowrap pb-2">
-            <TabsList className="inline-flex w-full justify-start md:justify-center p-1 bg-muted/50 h-auto min-w-full">
+            <TabsList className="inline-flex w-full justify-start md:justify-center p-1 bg-muted/50 h-auto min-w-full gap-1">
               {orderedDays.map(day => (
                 <TabsTrigger 
                   key={day} 
                   value={day} 
-                  className="px-6 py-3 text-sm font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="flex-1 px-3 py-1.5 text-xs md:text-sm font-bold uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground min-w-[3rem]"
                 >
                   {day}
                 </TabsTrigger>
