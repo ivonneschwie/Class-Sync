@@ -109,11 +109,7 @@ export default function ClassDetailsPage() {
   }
 
   return (
-<<<<<<< HEAD
-    <div className="space-y-4 max-w-4xl mx-auto w-full px-3 md:px-0 overflow-hidden">
-=======
     <div className="space-y-6 max-w-4xl mx-auto w-full px-2 md:px-0 overflow-hidden">
->>>>>>> 2e713f7 (ive rolled it back to version 121e66f, lessen the horizontal margins for)
        <div className="flex flex-col sm:flex-row gap-2 justify-between items-stretch sm:items-center">
          <Button variant="outline" size="sm" onClick={() => router.push('/')} className="w-full sm:w-auto">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -147,23 +143,6 @@ export default function ClassDetailsPage() {
         </div>
        </div>
 
-<<<<<<< HEAD
-      <Card className="overflow-hidden w-full min-w-0 shadow-md">
-        <CardHeader className="border-b-4 p-4 md:p-6 min-w-0" style={{ borderColor: classInfo.accentColor }}>
-          <CardTitle className="font-headline text-2xl md:text-3xl break-all leading-tight">
-            {classInfo.name}
-          </CardTitle>
-          <CardDescription className="text-base md:text-lg pt-1 break-all">
-            {classInfo.code}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6 space-y-4 min-w-0">
-          <div className="flex items-start text-muted-foreground min-w-0">
-            <User className="mr-3 h-5 w-5 flex-shrink-0 mt-0.5" />
-            <div className="flex flex-col min-w-0 flex-1">
-                <span className="font-semibold text-[10px] uppercase tracking-wider mb-0.5">Instructor</span>
-                <span className="text-foreground text-base break-all font-medium">{classInfo.instructor}</span>
-=======
       <Card className="overflow-hidden w-full min-w-0">
         <CardHeader className="px-3 sm:px-5 border-b-4 pb-4 min-w-0" style={{ borderColor: classInfo.accentColor }}>
           <CardTitle className="font-headline text-2xl md:text-4xl break-all leading-tight">
@@ -179,18 +158,13 @@ export default function ClassDetailsPage() {
             <div className="flex flex-col min-w-0 flex-1">
                 <span className="font-semibold text-[10px] uppercase tracking-wider mb-1">Instructor</span>
                 <span className="text-foreground text-base md:text-lg break-all">{classInfo.instructor}</span>
->>>>>>> c671afc (ok the timetable looks great, now for class details, lessen horizontal p)
             </div>
           </div>
           {classInfo.description && (
             <>
               <Separator className="opacity-50" />
               <div className="flex items-start text-muted-foreground min-w-0">
-<<<<<<< HEAD
-                <FileText className="mr-3 h-5 w-5 flex-shrink-0 mt-0.5" />
-=======
                 <FileText className="mr-3 h-5 w-5 flex-shrink-0 mt-1" />
->>>>>>> c671afc (ok the timetable looks great, now for class details, lessen horizontal p)
                 <div className="space-y-1 min-w-0 flex-1">
                   <span className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">Description</span>
                   <p className="text-sm md:text-base text-foreground whitespace-pre-wrap leading-relaxed break-all">
@@ -201,17 +175,6 @@ export default function ClassDetailsPage() {
             </>
           )}
         </CardContent>
-<<<<<<< HEAD
-        <CardFooter className="flex-col items-start gap-3 bg-muted/30 p-4 md:p-6 border-t min-w-0">
-            <h3 className="font-headline flex items-center text-lg md:text-xl mb-1 shrink-0">
-              <CalendarDays className="mr-2 h-5 w-5 text-primary"/> Sessions
-            </h3>
-            <div className="grid gap-3 w-full min-w-0">
-                {classInfo.schedule.map((slot, index) => (
-                    <div key={index} className="flex flex-col w-full rounded-lg border bg-background p-3 md:p-4 gap-3 shadow-sm min-w-0 overflow-hidden">
-                        <div className="flex flex-col gap-2 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center font-bold text-sm md:text-base min-w-0 gap-1.5">
-=======
         <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-4 sm:p-6 md:p-8 min-w-0">
             <h3 className="font-headline flex items-center text-lg md:text-2xl mb-1 shrink-0">
               <CalendarDays className="mr-2 h-5 w-5 text-primary"/> Sessions & Rooms
@@ -221,7 +184,6 @@ export default function ClassDetailsPage() {
                     <div key={index} className="flex flex-col w-full rounded-lg border bg-background p-3 md:p-5 gap-3 shadow-sm min-w-0 overflow-hidden">
                         <div className="flex flex-col gap-2 min-w-0">
                             <div className="flex flex-col sm:flex-row sm:items-center font-bold text-sm md:text-lg min-w-0 gap-1.5">
->>>>>>> c671afc (ok the timetable looks great, now for class details, lessen horizontal p)
                                 <div className="flex items-center shrink-0">
                                     <Clock className="mr-2 h-4 w-4 shrink-0" style={{ color: classInfo.accentColor }} />
                                     <span className="whitespace-nowrap tabular-nums">{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
