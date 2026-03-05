@@ -69,7 +69,7 @@ export default function ClassDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div>
           <Button variant="outline" disabled>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -81,13 +81,13 @@ export default function ClassDetailsPage() {
             <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-6 w-1/4" />
           </CardHeader>
-          <CardContent className="pt-6 space-y-4">
+          <CardContent className="pt-4 space-y-4">
             <div className="flex items-center">
                 <Skeleton className="h-6 w-6 rounded-full mr-3" />
                 <Skeleton className="h-6 w-1/2" />
             </div>
           </CardContent>
-          <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-6">
+          <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-4">
             <Skeleton className="h-7 w-1/3 mb-2" />
           </CardFooter>
         </Card>
@@ -97,7 +97,7 @@ export default function ClassDetailsPage() {
 
   if (!classInfo) {
     return (
-      <div className="space-y-4 text-center">
+      <div className="space-y-4 text-center py-10">
         <h1 className="text-2xl font-bold">Class Not Found</h1>
         <p>The class you are looking for does not exist or has been removed.</p>
         <Button onClick={() => router.push('/')}>
@@ -109,19 +109,19 @@ export default function ClassDetailsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto w-full px-4 md:px-0 overflow-hidden">
+    <div className="space-y-4 max-w-4xl mx-auto w-full px-3 md:px-0 overflow-hidden">
        <div className="flex flex-col sm:flex-row gap-2 justify-between items-stretch sm:items-center">
-         <Button variant="outline" onClick={() => router.push('/')} className="w-full sm:w-auto">
+         <Button variant="outline" size="sm" onClick={() => router.push('/')} className="w-full sm:w-auto">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Schedule
+            Back
         </Button>
         <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="secondary" onClick={() => setIsEditDialogOpen(true)} className="w-full sm:w-auto h-11 px-4">
+            <Button variant="secondary" size="sm" onClick={() => setIsEditDialogOpen(true)} className="w-full sm:w-auto h-9 px-4">
                 <Edit className="mr-2 h-4 w-4" /> Edit
             </Button>
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="w-full sm:w-auto h-11 px-4">
+                    <Button variant="destructive" size="sm" className="w-full sm:w-auto h-9 px-4">
                         <Trash2 className="mr-2 h-4 w-4" /> Delete
                     </Button>
                 </AlertDialogTrigger>
@@ -144,30 +144,30 @@ export default function ClassDetailsPage() {
        </div>
 
       <Card className="overflow-hidden w-full min-w-0">
-        <CardHeader className="border-b-4 pb-4 min-w-0" style={{ borderColor: classInfo.accentColor }}>
-          <CardTitle className="font-headline text-3xl md:text-4xl break-all leading-tight">
+        <CardHeader className="border-b-4 pb-3 min-w-0" style={{ borderColor: classInfo.accentColor }}>
+          <CardTitle className="font-headline text-2xl md:text-3xl break-all leading-tight">
             {classInfo.name}
           </CardTitle>
-          <CardDescription className="text-lg md:text-xl pt-1 break-all">
+          <CardDescription className="text-base md:text-lg pt-1 break-all">
             {classInfo.code}
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-8 space-y-6 min-w-0">
-          <div className="flex items-start text-lg md:text-xl text-muted-foreground min-w-0">
-            <User className="mr-4 h-6 w-6 flex-shrink-0 mt-0.5" />
+        <CardContent className="pt-5 space-y-4 min-w-0">
+          <div className="flex items-start text-muted-foreground min-w-0">
+            <User className="mr-3 h-5 w-5 flex-shrink-0 mt-0.5" />
             <div className="flex flex-col min-w-0 flex-1">
-                <span className="font-semibold text-sm uppercase tracking-wider mb-1">Instructor</span>
-                <span className="text-foreground break-all">{classInfo.instructor}</span>
+                <span className="font-semibold text-[10px] uppercase tracking-wider mb-0.5">Instructor</span>
+                <span className="text-foreground text-base break-all font-medium">{classInfo.instructor}</span>
             </div>
           </div>
           {classInfo.description && (
             <>
-              <Separator />
+              <Separator className="opacity-50" />
               <div className="flex items-start text-muted-foreground min-w-0">
-                <FileText className="mr-4 h-6 w-6 flex-shrink-0 mt-0.5" />
-                <div className="space-y-2 min-w-0 flex-1">
-                  <span className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Description</span>
-                  <p className="text-base md:text-lg text-foreground whitespace-pre-wrap leading-relaxed break-all">
+                <FileText className="mr-3 h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1 min-w-0 flex-1">
+                  <span className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">Description</span>
+                  <p className="text-sm md:text-base text-foreground whitespace-pre-wrap leading-relaxed break-all">
                     {classInfo.description}
                   </p>
                 </div>
@@ -175,27 +175,27 @@ export default function ClassDetailsPage() {
             </>
           )}
         </CardContent>
-        <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-6 md:p-8 min-w-0">
-            <h3 className="font-headline flex items-center text-xl md:text-2xl mb-2 shrink-0">
-              <CalendarDays className="mr-3 h-6 w-6 text-primary"/> Sessions & Rooms
+        <CardFooter className="flex-col items-start gap-3 bg-muted/30 p-4 md:p-6 min-w-0">
+            <h3 className="font-headline flex items-center text-lg md:text-xl mb-1 shrink-0">
+              <CalendarDays className="mr-2 h-5 w-5 text-primary"/> Sessions
             </h3>
-            <div className="grid gap-4 w-full min-w-0">
+            <div className="grid gap-3 w-full min-w-0">
                 {classInfo.schedule.map((slot, index) => (
-                    <div key={index} className="flex flex-col w-full rounded-xl border bg-background p-4 md:p-5 gap-4 shadow-sm min-w-0 overflow-hidden">
-                        <div className="flex flex-col gap-3 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center font-bold text-base md:text-lg min-w-0 gap-2">
+                    <div key={index} className="flex flex-col w-full rounded-lg border bg-background p-3 md:p-4 gap-3 shadow-sm min-w-0 overflow-hidden">
+                        <div className="flex flex-col gap-2 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center font-bold text-sm md:text-base min-w-0 gap-1.5">
                                 <div className="flex items-center shrink-0">
-                                    <Clock className="mr-3 h-5 w-5 shrink-0" style={{ color: classInfo.accentColor }} />
-                                    <span className="whitespace-nowrap">{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
+                                    <Clock className="mr-2 h-4 w-4 shrink-0" style={{ color: classInfo.accentColor }} />
+                                    <span className="whitespace-nowrap tabular-nums">{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
                                 </div>
                                 <div className="flex items-center text-muted-foreground font-medium min-w-0 flex-1">
-                                    <MapPin className="mr-2 h-4 w-4 shrink-0" style={{ color: classInfo.accentColor }} />
+                                    <MapPin className="mr-1.5 h-3.5 w-3.5 shrink-0" style={{ color: classInfo.accentColor }} />
                                     <span className="break-all">{slot.location}</span>
                                 </div>
                             </div>
-                            <div className="flex gap-2 flex-wrap shrink-0">
+                            <div className="flex gap-1.5 flex-wrap shrink-0">
                                 {slot.days.map(day => (
-                                    <Badge key={day} variant="secondary" className="px-3 py-1 text-xs font-bold">{dayLabels[day] || day}</Badge>
+                                    <Badge key={day} variant="secondary" className="px-2 py-0.5 text-[10px] font-bold">{dayLabels[day] || day}</Badge>
                                 ))}
                             </div>
                         </div>
@@ -206,11 +206,11 @@ export default function ClassDetailsPage() {
       </Card>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[520px] max-h-[90vh] flex flex-col">
-            <DialogHeader>
+        <DialogContent className="sm:max-w-[520px] max-h-[90vh] flex flex-col p-0">
+            <DialogHeader className="p-6 pb-0">
                 <DialogTitle className="font-headline text-2xl">Edit Class</DialogTitle>
             </DialogHeader>
-            <div className="flex-grow overflow-y-auto -mr-6 pr-6 py-4">
+            <div className="flex-grow overflow-y-auto px-6 py-4">
                 <AddClassForm onSave={handleUpdateClass} classToEdit={classInfo} />
             </div>
         </DialogContent>
