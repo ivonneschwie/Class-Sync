@@ -26,7 +26,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
             <div className="flex flex-col justify-center items-center gap-4 mb-4">
-              <Logo className="h-16 w-16 text-primary" />
+              <Logo className="h-24 w-24 text-primary" />
               <CardTitle className="font-headline text-3xl">Sign In</CardTitle>
             </div>
           <CardDescription>Welcome back to ClassSync! Please sign in.</CardDescription>

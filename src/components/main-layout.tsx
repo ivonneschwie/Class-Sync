@@ -90,7 +90,7 @@ function AppSidebar() {
         <SidebarHeader>
              <SidebarMenuButton asChild className="h-auto">
                 <Link href="/" className="flex items-center gap-2 font-headline font-semibold text-lg p-2">
-                    <Logo className="h-10 w-10 text-primary" />
+                    <Logo className="h-14 w-14 text-primary" />
                     <span className="group-data-[collapsible=icon]:hidden">ClassSync</span>
                 </Link>
              </SidebarMenuButton>

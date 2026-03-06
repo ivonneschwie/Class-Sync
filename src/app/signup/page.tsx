@@ -26,7 +26,7 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md">
          <CardHeader className="text-center">
             <div className="flex flex-col justify-center items-center gap-4 mb-4">
-              <Logo className="h-16 w-16 text-accent" />
+              <Logo className="h-24 w-24 text-accent" />
               <CardTitle className="font-headline text-3xl">Create an Account</CardTitle>
             </div>
           <CardDescription>Join ClassSync to start organizing your classes.</CardDescription>
