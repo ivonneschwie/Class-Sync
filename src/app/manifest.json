@@ -1,6 +1,8 @@
 {
   "name": "ClassSync",
   "short_name": "ClassSync",
+  "description": "Manage your school schedule, find study guides, and summarize notes with AI.",
+  "categories": ["education", "productivity"],
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -31,5 +33,6 @@
   "background_color": "#ffffff",
   "display": "standalone",
   "start_url": "/",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "scope": "/"
 }
