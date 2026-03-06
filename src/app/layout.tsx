@@ -30,6 +30,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
+      { url: '/icon0.svg', type: 'image/svg+xml' },
       { url: '/web-app-manifest-192x192.png', sizes: '192x192', type: 'image/png' },
       { url: '/web-app-manifest-512x512.png', sizes: '512x512', type: 'image/png' }
     ],

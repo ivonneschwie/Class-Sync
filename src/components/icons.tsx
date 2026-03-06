@@ -1,10 +1,10 @@
 import Image from 'next/image';
 import type { SVGProps } from "react";
-import logoImg from '@/app/web-app-manifest-512x512.png';
+import logoImg from '@/app/icon0.svg';
 
 
 /**
- * Logo component using the web-app-manifest-512x512.png image.
+ * Logo component using the icon0.svg image.
  */
 export function Logo({ className, ...props }: { className?: string } & any) {
   return (
@@ -12,8 +12,8 @@ export function Logo({ className, ...props }: { className?: string } & any) {
       <Image 
         src={logoImg}
         alt="ClassSync Logo" 
-        width={80} 
-        height={80} 
+        width={120} 
+        height={120} 
         priority
         className="object-contain w-full h-full"
       />

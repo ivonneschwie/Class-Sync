@@ -109,7 +109,7 @@ export default function ClassDetailsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto w-full px-2 md:px-0 overflow-hidden">
+    <div className="space-y-6 max-w-4xl mx-auto w-full px-4 md:px-0 overflow-hidden">
        <div className="flex flex-col sm:flex-row gap-2 justify-between items-stretch sm:items-center">
          <Button variant="outline" size="sm" onClick={() => router.push('/')} className="w-full sm:w-auto">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -144,28 +144,28 @@ export default function ClassDetailsPage() {
        </div>
 
       <Card className="overflow-hidden w-full min-w-0">
-        <CardHeader className="px-3 sm:px-5 border-b-4 pb-4 min-w-0" style={{ borderColor: classInfo.accentColor }}>
-          <CardTitle className="font-headline text-2xl md:text-4xl break-all leading-tight">
+        <CardHeader className="px-2 sm:px-4 border-b-4 pb-3 min-w-0" style={{ borderColor: classInfo.accentColor }}>
+          <CardTitle className="font-headline text-2xl md:text-3xl break-all leading-tight">
             {classInfo.name}
           </CardTitle>
-          <CardDescription className="text-base md:text-xl pt-1 break-all">
+          <CardDescription className="text-base md:text-lg pt-0.5 break-all">
             {classInfo.code}
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-3 sm:px-5 pt-6 space-y-6 min-w-0">
-          <div className="flex items-start text-lg md:text-xl text-muted-foreground min-w-0">
-            <User className="mr-3 h-5 w-5 flex-shrink-0 mt-1" />
+        <CardContent className="px-2 sm:px-4 pt-4 space-y-4 min-w-0">
+          <div className="flex items-start text-base md:text-lg text-muted-foreground min-w-0">
+            <User className="mr-2.5 h-4.5 w-4.5 flex-shrink-0 mt-0.5" />
             <div className="flex flex-col min-w-0 flex-1">
-                <span className="font-semibold text-[10px] uppercase tracking-wider mb-1">Instructor</span>
-                <span className="text-foreground text-base md:text-lg break-all">{classInfo.instructor}</span>
+                <span className="font-semibold text-[10px] uppercase tracking-wider mb-0.5">Instructor</span>
+                <span className="text-foreground text-sm md:text-base break-all">{classInfo.instructor}</span>
             </div>
           </div>
           {classInfo.description && (
             <>
               <Separator className="opacity-50" />
               <div className="flex items-start text-muted-foreground min-w-0">
-                <FileText className="mr-3 h-5 w-5 flex-shrink-0 mt-1" />
-                <div className="space-y-1 min-w-0 flex-1">
+                <FileText className="mr-2.5 h-4.5 w-4.5 flex-shrink-0 mt-0.5" />
+                <div className="space-y-0.5 min-w-0 flex-1">
                   <span className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">Description</span>
                   <p className="text-sm md:text-base text-foreground whitespace-pre-wrap leading-relaxed break-all">
                     {classInfo.description}
@@ -175,17 +175,17 @@ export default function ClassDetailsPage() {
             </>
           )}
         </CardContent>
-        <CardFooter className="flex-col items-start gap-4 bg-muted/50 p-4 sm:p-6 md:p-8 min-w-0">
-            <h3 className="font-headline flex items-center text-lg md:text-2xl mb-1 shrink-0">
-              <CalendarDays className="mr-2 h-5 w-5 text-primary"/> Sessions & Rooms
+        <CardFooter className="flex-col items-start gap-3 bg-muted/50 p-3 sm:p-5 md:p-6 min-w-0">
+            <h3 className="font-headline flex items-center text-base md:text-xl mb-0.5 shrink-0">
+              <CalendarDays className="mr-2 h-4.5 w-4.5 text-primary"/> Sessions & Rooms
             </h3>
-            <div className="grid gap-3 w-full min-w-0">
+            <div className="grid gap-2.5 w-full min-w-0">
                 {classInfo.schedule.map((slot, index) => (
-                    <div key={index} className="flex flex-col w-full rounded-lg border bg-background p-3 md:p-5 gap-3 shadow-sm min-w-0 overflow-hidden">
-                        <div className="flex flex-col gap-2 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center font-bold text-sm md:text-lg min-w-0 gap-1.5">
+                    <div key={index} className="flex flex-col w-full rounded-lg border bg-background p-2.5 md:p-4 gap-2.5 shadow-sm min-w-0 overflow-hidden">
+                        <div className="flex flex-col gap-1.5 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center font-bold text-sm md:text-base min-w-0 gap-1">
                                 <div className="flex items-center shrink-0">
-                                    <Clock className="mr-2 h-4 w-4 shrink-0" style={{ color: classInfo.accentColor }} />
+                                    <Clock className="mr-1.5 h-3.5 w-3.5 shrink-0" style={{ color: classInfo.accentColor }} />
                                     <span className="whitespace-nowrap tabular-nums">{formatTimeToAMPM(slot.startTime)} - {formatTimeToAMPM(slot.endTime)}</span>
                                 </div>
                                 <div className="flex items-center text-muted-foreground font-medium min-w-0 flex-1">
@@ -193,9 +193,9 @@ export default function ClassDetailsPage() {
                                     <span className="break-all">{slot.location}</span>
                                 </div>
                             </div>
-                            <div className="flex gap-1.5 flex-wrap shrink-0">
+                            <div className="flex gap-1 flex-wrap shrink-0">
                                 {slot.days.map(day => (
-                                    <Badge key={day} variant="secondary" className="px-2 py-0.5 text-[10px] font-bold">{dayLabels[day] || day}</Badge>
+                                    <Badge key={day} variant="secondary" className="px-1.5 py-0 text-[10px] font-bold">{dayLabels[day] || day}</Badge>
                                 ))}
                             </div>
                         </div>
