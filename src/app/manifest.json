@@ -1,11 +1,6 @@
 {
   "name": "ClassSync",
-  "short_name": "CS",
-  "description": "Manage your school schedule, find study groups, and summarize notes with AI.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "short_name": "ClassSync",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -19,5 +14,8 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
 }

@@ -12,10 +12,10 @@ export function Logo({ className, ...props }: { className?: string } & any) {
       <Image 
         src={logoImg}
         alt="ClassSync Logo" 
-        width={40} 
-        height={40} 
+        width={80} 
+        height={80} 
         priority
-        className="object-contain"
+        className="object-contain w-full h-full"
       />
     </div>
   );
