@@ -1,4 +1,3 @@
-
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';
@@ -22,6 +21,7 @@ export function initializeFirebase() {
     const sdks = getSdks(firebaseApp);
     
     // Enable Offline Persistence for Firestore
+    // This allows the app to store data locally in IndexedDB and sync when online.
     if (typeof window !== 'undefined') {
       enableMultiTabIndexedDbPersistence(sdks.firestore).catch((err) => {
         if (err.code === 'failed-precondition') {

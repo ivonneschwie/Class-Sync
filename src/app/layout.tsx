@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from 'next';
 import { MainLayout } from '@/components/main-layout';
 import { Toaster } from "@/components/ui/toaster"
@@ -73,9 +72,25 @@ export default function RootLayout({
         <Script id="register-sw" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('SW registered!', reg))
-                .catch(err => console.log('SW reg failed!', err));
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                  .then(reg => {
+                    console.log('ClassSync SW registered!', reg);
+                    
+                    // Optional: Listen for updates
+                    reg.onupdatefound = () => {
+                      const installingWorker = reg.installing;
+                      if (installingWorker) {
+                        installingWorker.onstatechange = () => {
+                          if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('New content is available; please refresh.');
+                          }
+                        };
+                      }
+                    };
+                  })
+                  .catch(err => console.log('ClassSync SW registration failed:', err));
+              });
             }
           `}
         </Script>
