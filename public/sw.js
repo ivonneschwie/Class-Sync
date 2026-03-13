@@ -1,14 +1,13 @@
 
-const CACHE_NAME = 'classsync-cache-v1';
+const CACHE_NAME = 'classsync-v1';
 const ASSETS_TO_CACHE = [
   '/',
-  '/login',
-  '/signup',
   '/manifest.json',
   '/icon0.svg',
+  '/web-app-manifest-192x192.png',
+  '/web-app-manifest-512x512.png',
 ];
 
-// Install event: cache the core app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -18,42 +17,28 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate event: clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
       );
     })
   );
   self.clients.claim();
 });
 
-// Fetch event: Stale-while-revalidate strategy
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
+  // We only want to cache GET requests for static assets
   if (event.request.method !== 'GET') return;
 
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) return;
-
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Cache the updated response
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // If network fails and no cache, we just return whatever caches.match gave us (undefined)
-      });
-
-      return cachedResponse || fetchPromise;
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
     })
   );
 });
