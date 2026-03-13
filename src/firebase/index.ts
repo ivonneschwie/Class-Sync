@@ -6,8 +6,7 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, enableMultiTabIndexedDbPersistence } from 'firebase/firestore'
 
-// IMPORTANT: DO NOT MODIFY THE CORE INITIALIZATION LOGIC
-// We are extending it to support offline persistence.
+// IMPORTANT: We are extending the core initialization to support offline persistence.
 export function initializeFirebase() {
   if (!getApps().length) {
     let firebaseApp;
@@ -22,7 +21,7 @@ export function initializeFirebase() {
 
     const sdks = getSdks(firebaseApp);
     
-    // Enable Offline Persistence
+    // Enable Offline Persistence for Firestore
     if (typeof window !== 'undefined') {
       enableMultiTabIndexedDbPersistence(sdks.firestore).catch((err) => {
         if (err.code === 'failed-precondition') {
