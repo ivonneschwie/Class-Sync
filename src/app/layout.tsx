@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from 'next';
 import { MainLayout } from '@/components/main-layout';
 import { Toaster } from "@/components/ui/toaster"
@@ -6,6 +7,7 @@ import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ColorThemeProvider } from '@/components/color-theme-provider';
 import './globals.css';
+import Script from 'next/script';
 
 export const viewport: Viewport = {
   themeColor: '#ffffff',
@@ -68,6 +70,19 @@ export default function RootLayout({
             </ColorThemeProvider>
           </ThemeProvider>
         </FirebaseClientProvider>
+        <Script id="register-sw" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                  console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                  console.log('ServiceWorker registration failed: ', err);
+                });
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );
