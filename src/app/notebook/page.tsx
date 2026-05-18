@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Summary } from "@/lib/types";
 import { format } from 'date-fns';
-import { Book, FileText, ChevronLeft, ChevronDown, Save, Plus, Trash2, Edit3, Search, FileSignature, Sparkles, Menu } from 'lucide-react';
+import { Book, FileText, ChevronLeft, ChevronDown, Save, Plus, Trash2, Edit3, Search, FileSignature, Sparkles, Menu, Bold, Italic, List, CheckSquare, Quote, Code, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSummaries } from '@/context/summaries-context';
 import { useClasses } from '@/context/classes-context';
@@ -21,6 +21,298 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+const highlightCode = (code: string, lang?: string) => {
+  const placeholders: { comment: string; val: string }[] = [];
+  const stringPlaceholders: { placeholder: string; val: string }[] = [];
+  let tempCode = code;
+
+  // 1. Resolve target language (defaults to python)
+  const language = lang ? lang.toLowerCase().trim() : 'python';
+  let targetLang = 'python';
+  
+  if (language === 'js' || language === 'jsx' || language === 'javascript') {
+    targetLang = 'javascript';
+  } else if (language === 'ts' || language === 'tsx' || language === 'typescript') {
+    targetLang = 'typescript';
+  } else if (language === 'py' || language === 'python') {
+    targetLang = 'python';
+  } else if (language === 'cpp' || language === 'c++' || language === 'c') {
+    targetLang = 'cpp';
+  } else if (language === 'java' || language === 'kotlin' || language === 'kt') {
+    targetLang = 'java';
+  } else if (language === 'sql') {
+    targetLang = 'sql';
+  } else if (language === 'go' || language === 'golang') {
+    targetLang = 'go';
+  } else if (language === 'rust' || language === 'rs') {
+    targetLang = 'rust';
+  } else if (language === 'html' || language === 'xml') {
+    targetLang = 'html';
+  }
+
+  // 2. Language-specific keyword dictionaries
+  const languageKeywords: Record<string, string[]> = {
+    python: [
+      'def', 'class', 'return', 'if', 'elif', 'else', 'for', 'while', 'in', 'import', 'from', 'as', 
+      'try', 'except', 'finally', 'raise', 'with', 'lambda', 'pass', 'break', 'continue', 'and', 
+      'or', 'not', 'is', 'None', 'True', 'False', 'global', 'nonlocal', 'yield', 'assert', 'del'
+    ],
+    javascript: [
+      'const', 'let', 'var', 'function', 'class', 'return', 'if', 'else', 'for', 'while', 'do', 
+      'in', 'of', 'import', 'export', 'from', 'as', 'try', 'catch', 'finally', 'throw', 'new', 
+      'this', 'super', 'interface', 'type', 'implements', 'extends', 'package', 'async', 'await', 
+      'yield', 'null', 'true', 'false', 'undefined', 'switch', 'case', 'default', 'break', 'continue', 
+      'typeof', 'instanceof', 'void', 'delete'
+    ],
+    typescript: [
+      'const', 'let', 'var', 'function', 'class', 'return', 'if', 'else', 'for', 'while', 'do', 
+      'in', 'of', 'import', 'export', 'from', 'as', 'try', 'catch', 'finally', 'throw', 'new', 
+      'this', 'super', 'interface', 'type', 'implements', 'extends', 'package', 'async', 'await', 
+      'yield', 'null', 'true', 'false', 'undefined', 'switch', 'case', 'default', 'break', 'continue', 
+      'typeof', 'instanceof', 'void', 'delete', 'any', 'number', 'string', 'boolean', 'unknown', 
+      'never', 'void', 'keyof', 'readonly', 'as', 'namespace', 'declare'
+    ],
+    cpp: [
+      'int', 'float', 'double', 'char', 'bool', 'void', 'class', 'struct', 'union', 'enum', 
+      'public', 'private', 'protected', 'virtual', 'override', 'const', 'static', 'constexpr', 
+      'inline', 'template', 'typename', 'namespace', 'using', 'include', 'define', 'if', 'else', 
+      'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'new', 
+      'delete', 'this', 'throw', 'try', 'catch', 'friend', 'operator', 'sizeof'
+    ],
+    java: [
+      'public', 'private', 'protected', 'static', 'final', 'class', 'interface', 'enum', 'extends', 
+      'implements', 'package', 'import', 'void', 'int', 'double', 'float', 'long', 'short', 'byte', 
+      'char', 'boolean', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 
+      'continue', 'return', 'new', 'this', 'super', 'throw', 'throws', 'try', 'catch', 'finally', 
+      'instanceof', 'synchronized', 'volatile', 'transient', 'fun', 'val', 'var', 'null', 'true', 'false'
+    ],
+    sql: [
+      'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER', 'TABLE', 
+      'INDEX', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'OUTER', 'ON', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 
+      'BETWEEN', 'IS', 'NULL', 'AS', 'ORDER', 'BY', 'GROUP', 'HAVING', 'LIMIT', 'VALUES', 'INTO', 
+      'SET', 'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES', 'UNIQUE', 'CONSTRAINT', 'select', 'from', 
+      'where', 'insert', 'update', 'delete', 'create', 'drop', 'alter', 'table', 'index', 'join', 
+      'inner', 'left', 'right', 'outer', 'on', 'and', 'or', 'not', 'in', 'like', 'between', 'is', 
+      'null', 'as', 'order', 'by', 'group', 'having', 'limit', 'values', 'into', 'set', 'primary', 
+      'key', 'foreign', 'references', 'unique', 'constraint'
+    ],
+    go: [
+      'package', 'import', 'func', 'var', 'const', 'type', 'struct', 'interface', 'map', 'chan', 
+      'go', 'select', 'defer', 'return', 'if', 'else', 'for', 'range', 'switch', 'case', 'default', 
+      'fallthrough', 'break', 'continue', 'goto', 'nil', 'true', 'false'
+    ],
+    rust: [
+      'fn', 'let', 'mut', 'const', 'static', 'impl', 'trait', 'struct', 'enum', 'use', 'mod', 
+      'pub', 'return', 'if', 'else', 'loop', 'while', 'for', 'in', 'match', 'break', 'continue', 
+      'unsafe', 'where', 'type', 'as', 'self', 'Self', 'true', 'false'
+    ],
+    html: [
+      'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'button', 'input', 'form', 
+      'script', 'style', 'html', 'body', 'head', 'meta', 'link', 'img', 'ul', 'ol', 'li', 'table', 
+      'tr', 'td', 'th', 'thead', 'tbody', 'section', 'header', 'footer', 'nav', 'main', 'aside', 
+      'canvas', 'svg', 'class', 'id', 'src', 'href', 'alt', 'type', 'value', 'placeholder', 'rel', 
+      'name', 'target', 'style', 'onclick'
+    ]
+  };
+
+  // 3. Language-specific built-in references
+  const languageBuiltins: Record<string, string[]> = {
+    python: ['print', 'len', 'range', 'str', 'int', 'dict', 'list', 'set', 'tuple', 'open', 'sum', 'max', 'min', 'type', 'enumerate', 'zip'],
+    javascript: ['console', 'window', 'document', 'self', 'Math', 'JSON', 'Object', 'Array', 'Promise', 'fetch', 'setTimeout'],
+    typescript: ['console', 'window', 'document', 'self', 'Math', 'JSON', 'Object', 'Array', 'Promise', 'fetch', 'setTimeout'],
+    cpp: ['std', 'cout', 'cin', 'endl', 'printf', 'scanf', 'vector', 'string', 'map', 'set'],
+    java: ['System', 'out', 'println', 'print', 'String', 'Integer', 'Double', 'List', 'ArrayList', 'Map', 'HashMap'],
+    sql: ['COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'count', 'sum', 'avg', 'min', 'max'],
+    go: ['fmt', 'Println', 'Printf', 'Print', 'make', 'new', 'append', 'panic', 'recover'],
+    rust: ['println', 'print', 'format', 'panic', 'vec', 'String', 'Option', 'Result'],
+    html: ['console', 'window', 'document']
+  };
+
+  // 4. Stash Comments (//, #, /* */) using lowercase IDs to completely avoid Capitalized Class regex matches
+  tempCode = tempCode.replace(/(\/\/.*)/g, (match) => {
+    const id = `___comment_${placeholders.length}___`;
+    placeholders.push({ comment: id, val: `<span class="text-muted-foreground/60 italic">${match}</span>` });
+    return id;
+  });
+
+  tempCode = tempCode.replace(/(#.*)/g, (match) => {
+    const id = `___comment_${placeholders.length}___`;
+    placeholders.push({ comment: id, val: `<span class="text-muted-foreground/60 italic">${match}</span>` });
+    return id;
+  });
+
+  tempCode = tempCode.replace(/(\/\*[\s\S]*?\*\/)/g, (match) => {
+    const id = `___comment_${placeholders.length}___`;
+    placeholders.push({ comment: id, val: `<span class="text-muted-foreground/60 italic">${match}</span>` });
+    return id;
+  });
+
+  // 5. Stash Strings ("...", '...', `...`) using lowercase IDs
+  tempCode = tempCode.replace(/(&quot;[\s\S]*?&quot;|"[\s\S]*?")/g, (match) => {
+    const id = `___string_${stringPlaceholders.length}___`;
+    stringPlaceholders.push({ placeholder: id, val: `<span class="text-emerald-500 font-medium">${match}</span>` });
+    return id;
+  });
+
+  tempCode = tempCode.replace(/(&#39;[\s\S]*?&#39;|'[\s\S]*?')/g, (match) => {
+    const id = `___string_${stringPlaceholders.length}___`;
+    stringPlaceholders.push({ placeholder: id, val: `<span class="text-emerald-500 font-medium">${match}</span>` });
+    return id;
+  });
+
+  tempCode = tempCode.replace(/(`[\s\S]*?`)/g, (match) => {
+    const id = `___string_${stringPlaceholders.length}___`;
+    stringPlaceholders.push({ placeholder: id, val: `<span class="text-emerald-500 font-medium">${match}</span>` });
+    return id;
+  });
+
+  // 6. Match keywords, built-ins, numbers, and types in a single pass!
+  // This guarantees we never search-and-replace recursively on already injected HTML tags (like matching 'class' inside '<span class="...">')!
+  const keywords = languageKeywords[targetLang] || languageKeywords.python;
+  const builtins = languageBuiltins[targetLang] || languageBuiltins.python;
+
+  const escapedKeywords = keywords.map(kw => kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+  const escapedBuiltins = builtins.map(b => b.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+
+  const pattern = new RegExp(
+    `\\b(${escapedKeywords.join('|')})\\b` +
+    `|\\b(${escapedBuiltins.join('|')})\\b` +
+    `|\\b(\\d+(?:\\.\\d+)?)\\b` +
+    `|\\b([A-Z][a-zA-Z0-9_]*)\\b`,
+    'g'
+  );
+
+  tempCode = tempCode.replace(pattern, (match, kw, builtin, num, typeName) => {
+    if (kw) {
+      return `<span class="text-pink-500 font-semibold">${kw}</span>`;
+    }
+    if (builtin) {
+      return `<span class="text-cyan-400 font-medium">${builtin}</span>`;
+    }
+    if (num) {
+      return `<span class="text-amber-500 font-medium">${num}</span>`;
+    }
+    if (typeName) {
+      return `<span class="text-sky-500 font-medium">${typeName}</span>`;
+    }
+    return match;
+  });
+
+  // 7. Restore stashed segments in reverse order using callbacks to avoid regex $ character substitution bugs
+  for (let i = stringPlaceholders.length - 1; i >= 0; i--) {
+    tempCode = tempCode.replace(new RegExp(stringPlaceholders[i].placeholder, 'g'), () => stringPlaceholders[i].val);
+  }
+  for (let i = placeholders.length - 1; i >= 0; i--) {
+    tempCode = tempCode.replace(new RegExp(placeholders[i].comment, 'g'), () => placeholders[i].val);
+  }
+
+  return tempCode;
+};
+
+const renderMarkdown = (text: string, onTodoClick?: (index: number) => void) => {
+  if (!text) return <p className="text-muted-foreground/50 italic" style={{ margin: 0, paddingBottom: '2.2rem', lineHeight: '2.2rem' }}>No content in this note yet. Click "Edit Note" to start writing.</p>;
+  
+  // Escape HTML to prevent XSS
+  let html = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Code blocks with specified language syntax: ```js code ```
+  html = html.replace(/```(\w*)\s*\n([\s\S]*?)```/g, (match, lang, code) => {
+    const language = lang ? lang.toLowerCase() : '';
+    const highlighted = highlightCode(code, language);
+    
+    const displayLang = language === 'js' ? 'JavaScript' :
+                        language === 'ts' ? 'TypeScript' :
+                        language === 'py' ? 'Python' :
+                        language === 'cpp' ? 'C++' :
+                        language === 'cs' ? 'C#' :
+                        language ? language.charAt(0).toUpperCase() + language.slice(1) : 'Code';
+
+    return `<div class="relative group rounded-xl overflow-hidden border border-muted-foreground/10 shadow-inner max-w-full my-4" style="margin: 0; margin-bottom: 2.2rem;"><div class="flex items-center justify-between px-4 py-2 bg-muted/80 text-[10px] text-muted-foreground/80 font-mono font-bold select-none border-b border-muted-foreground/5"><span>${displayLang}</span><span class="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-sans uppercase">Syntax</span></div><pre class="bg-muted/40 font-mono text-xs overflow-x-auto max-w-full" style="margin: 0; padding: 1.1rem; line-height: 1.1rem;"><code class="block whitespace-pre">${highlighted}</code></pre></div>`;
+  });
+
+  // Fallback for simple triple backticks on one line or unspecified syntax blocks
+  html = html.replace(/```([\s\S]+?)```/g, (match, code) => {
+    const highlighted = highlightCode(code);
+    return `<pre class="bg-muted/75 rounded-xl font-mono text-xs overflow-x-auto border border-muted-foreground/10 text-foreground shadow-inner max-w-full" style="margin: 0; margin-bottom: 2.2rem; padding: 1.1rem; line-height: 1.1rem;"><code class="block whitespace-pre">${highlighted}</code></pre>`;
+  });
+
+  // Inline code: `code` -> <code class="...">code</code>
+  html = html.replace(/`([^`\n]+?)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded font-mono text-xs text-primary">$1</code>');
+
+  // Headers: # Heading -> <h1>
+  html = html.replace(/^# (.*?)$/gm, '<h1 class="text-2xl font-bold font-headline text-foreground border-b pb-1 border-muted/30" style="margin: 0; margin-top: 2.2rem; margin-bottom: 2.2rem; line-height: 2.2rem;">$1</h1>');
+  html = html.replace(/^## (.*?)$/gm, '<h2 class="text-xl font-bold font-headline text-foreground" style="margin: 0; margin-top: 2.2rem; margin-bottom: 2.2rem; line-height: 2.2rem;">$1</h2>');
+  html = html.replace(/^### (.*?)$/gm, '<h3 class="text-md font-bold font-headline text-foreground" style="margin: 0; margin-top: 2.2rem; margin-bottom: 2.2rem; line-height: 2.2rem;">$1</h3>');
+
+  // Checkboxes: - [ ] / - [x] -> custom visual checkbox button
+  let todoCount = 0;
+  html = html.replace(/^- \[( |x)\] (.*?)$/gm, (match, checked, content) => {
+    const isChecked = checked === 'x';
+    const index = todoCount++;
+    if (isChecked) {
+      return `<button data-todo-index="${index}" class="flex items-center gap-2 text-left select-none group focus:outline-none" style="margin: 0; line-height: 2.2rem; min-height: 2.2rem;"><div class="h-4 w-4 rounded bg-primary flex items-center justify-center text-primary-foreground text-[10px] shrink-0 font-bold group-hover:scale-105 active:scale-95 transition-all">✓</div> <span class="text-sm text-muted-foreground/60 line-through decoration-muted-foreground/40">${content}</span></button>`;
+    } else {
+      return `<button data-todo-index="${index}" class="flex items-center gap-2 text-left select-none group focus:outline-none" style="margin: 0; line-height: 2.2rem; min-height: 2.2rem;"><div class="h-4 w-4 rounded border border-primary/30 flex items-center justify-center text-transparent group-hover:text-primary/30 group-hover:border-primary/50 text-[10px] shrink-0 font-bold bg-background group-hover:scale-105 active:scale-95 transition-all">✓</div> <span class="text-sm text-foreground/90">${content}</span></button>`;
+    }
+  });
+
+  // Bullet points: - item -> <li>
+  html = html.replace(/^- (.*?)$/gm, '<li class="text-sm text-foreground/95 ml-4 list-disc pl-1" style="margin: 0; line-height: 2.2rem;">$1</li>');
+
+  // Bold: **text** -> <strong>
+  html = html.replace(/\*\*([\s\S]+?)\*\*/g, '<strong class="font-bold text-primary">$1</strong>');
+
+  // Italic: *text* -> <em>
+  html = html.replace(/\*([\s\S]+?)\*/g, '<em class="italic text-foreground/90">$1</em>');
+
+  // Blockquotes: > text -> <blockquote>
+  html = html.replace(/^&gt; (.*?)$/gm, '<blockquote class="border-l-4 border-primary bg-primary/5 pl-4 my-3 rounded-r-lg italic text-muted-foreground" style="margin: 0; margin-bottom: 2.2rem; line-height: 2.2rem; padding: 0 1.25rem;">$1</blockquote>');
+
+  // Paragraphs
+  // Split by exactly two newlines so consecutive breaks yield separate blocks instead of collapsing
+  const paragraphs = html.split(/\n\n/);
+  html = paragraphs
+    .map(p => {
+      // If the block is completely empty (consecutive breaks), render a perfect empty notepad row
+      if (p.trim() === '') {
+        return `<p class="text-md text-foreground/90 font-sans" style="margin: 0; margin-bottom: 2.2rem; line-height: 2.2rem;">&nbsp;</p>`;
+      }
+      // If it already starts with a tag (h1, pre, div, li, blockquote, button), return it directly
+      if (p.trim().startsWith('<h') || p.trim().startsWith('<pre') || p.trim().startsWith('<div') || p.trim().startsWith('<li') || p.trim().startsWith('<blockquote') || p.trim().startsWith('<button')) {
+        return p;
+      }
+      return `<p class="text-md text-foreground/90 font-sans" style="margin: 0; margin-bottom: 2.2rem; line-height: 2.2rem;">${p.replace(/\n/g, '<br />')}</p>`;
+    })
+    .join('');
+
+  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!onTodoClick) return;
+    const button = (e.target as HTMLElement).closest('[data-todo-index]');
+    if (!button) return;
+    const indexAttr = button.getAttribute('data-todo-index');
+    if (indexAttr !== null) {
+      onTodoClick(parseInt(indexAttr, 10));
+    }
+  };
+
+  return (
+    <div 
+      onClick={handleContainerClick}
+      className={cn("max-w-none break-words min-h-[350px] pb-8", onTodoClick && "[&_button]:cursor-pointer")} 
+      style={{
+        backgroundImage: 'linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px)',
+        backgroundSize: '100% 2.2rem',
+        lineHeight: '2.2rem',
+        borderLeft: '2px solid rgba(239, 68, 68, 0.25)',
+        paddingLeft: '1.25rem',
+      }}
+      dangerouslySetInnerHTML={{ __html: html }} 
+    />
+  );
+};
 
 export default function NotebookPage() {
   const { classes } = useClasses();
@@ -38,6 +330,33 @@ export default function NotebookPage() {
   const [editTitle, setEditTitle] = useState('');
   const [editBody, setEditBody] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [pendingNewNoteTitle, setPendingNewNoteTitle] = useState<string | null>(null);
+
+  // 1. Keep selectedNote in sync with the real-time notes collection
+  useEffect(() => {
+    if (selectedNote) {
+      const freshNote = notes.find(n => n.id === selectedNote.id);
+      if (freshNote) {
+        if (freshNote.title !== selectedNote.title || freshNote.notes !== selectedNote.notes) {
+          setSelectedNote(freshNote);
+        }
+      }
+    }
+  }, [notes, selectedNote]);
+
+  // 2. Automatically select the newly created note when it is written to the Firestore collection
+  useEffect(() => {
+    if (pendingNewNoteTitle && selectedSubject) {
+      const newNote = notes.find(n => n.title === pendingNewNoteTitle && n.subject === selectedSubject);
+      if (newNote) {
+        setSelectedNote(newNote);
+        setPendingNewNoteTitle(null);
+        if (isMobile) {
+          setMobileView('editor');
+        }
+      }
+    }
+  }, [notes, pendingNewNoteTitle, selectedSubject, isMobile]);
 
   // Navigation panel toggle (Desktop)
   const [showNav, setShowNav] = useState(true);
@@ -67,6 +386,8 @@ export default function NotebookPage() {
     return filtered.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
   }, [notes, selectedSubject, searchQuery]);
 
+  const [editPreviewMode, setEditPreviewMode] = useState(false);
+
   // Sync edit states when selecting a note
   useEffect(() => {
     if (selectedNote) {
@@ -76,7 +397,92 @@ export default function NotebookPage() {
       setEditTitle('');
       setEditBody('');
     }
+    setEditPreviewMode(false);
   }, [selectedNote]);
+
+  const handleInsertMarkdown = (syntax: string) => {
+    const isMobileTextarea = isMobile && mobileView === 'editor';
+    const textareaId = isMobileTextarea ? 'note-textarea-mobile' : 'note-textarea';
+    const textarea = document.getElementById(textareaId) as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = editBody;
+    const selectedText = text.substring(start, end);
+
+    let replacement = '';
+    let cursorOffset = 0;
+
+    switch (syntax) {
+      case 'bold':
+        replacement = `**${selectedText || 'bold text'}**`;
+        cursorOffset = selectedText ? replacement.length : 2;
+        break;
+      case 'italic':
+        replacement = `*${selectedText || 'italic text'}*`;
+        cursorOffset = selectedText ? replacement.length : 1;
+        break;
+      case 'heading':
+        replacement = `\n# ${selectedText || 'Heading'}\n`;
+        cursorOffset = replacement.length;
+        break;
+      case 'subheading':
+        replacement = `\n## ${selectedText || 'Subheading'}\n`;
+        cursorOffset = replacement.length;
+        break;
+      case 'bullet':
+        replacement = `\n- ${selectedText || 'List item'}`;
+        cursorOffset = replacement.length;
+        break;
+      case 'todo':
+        replacement = `\n- [ ] ${selectedText || 'Todo item'}`;
+        cursorOffset = replacement.length;
+        break;
+      case 'quote':
+        replacement = `\n> ${selectedText || 'Blockquote'}\n`;
+        cursorOffset = replacement.length;
+        break;
+      case 'code':
+        replacement = `\n\`\`\`\n${selectedText || 'code'}\n\`\`\`\n`;
+        cursorOffset = replacement.length;
+        break;
+      default:
+        break;
+    }
+
+    const newText = text.substring(0, start) + replacement + text.substring(end);
+    setEditBody(newText);
+
+    // Refocus and set cursor
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + cursorOffset, start + cursorOffset);
+    }, 50);
+  };
+
+  const handleTodoToggle = (targetIndex: number) => {
+    const targetText = isEditing ? editBody : (selectedNote?.notes || '');
+    
+    let currentIndex = 0;
+    const toggledText = targetText.replace(/^- \[( |x)\] (.*?)$/gm, (match, checked, content) => {
+      const idx = currentIndex++;
+      if (idx === targetIndex) {
+        const nextChecked = checked === 'x' ? ' ' : 'x';
+        return `- [${nextChecked}] ${content}`;
+      }
+      return match;
+    });
+    
+    if (isEditing) {
+      setEditBody(toggledText);
+    } else if (selectedNote) {
+      updateNote(selectedNote.id, {
+        notes: toggledText
+      });
+      setSelectedNote(prev => prev ? { ...prev, notes: toggledText } : null);
+    }
+  };
 
   const handleSelectSubject = (subject: string) => {
     setSelectedSubject(subject);
@@ -126,6 +532,12 @@ export default function NotebookPage() {
         title: editTitle,
         notes: editBody,
       });
+      // Update local state immediately for instant, latency-free feedback
+      setSelectedNote({
+        ...selectedNote,
+        title: editTitle,
+        notes: editBody
+      });
       toast({ title: 'Success', description: 'Note updated successfully!' });
     } else {
       addNote({
@@ -135,6 +547,8 @@ export default function NotebookPage() {
         summary: '',
         clarificationQuestions: ''
       });
+      // Set the pending title trigger so our reactive effect selects it immediately upon creation
+      setPendingNewNoteTitle(editTitle);
       toast({ title: 'Success', description: 'Note created successfully!' });
     }
     setIsEditing(false);
@@ -164,9 +578,35 @@ export default function NotebookPage() {
     setNoteIdToDelete(null);
   };
 
-  // Word & Character count helper
+  // Word & Character count helper for edit mode
   const wordCount = editBody.trim() ? editBody.trim().split(/\s+/).length : 0;
   const charCount = editBody.length;
+
+  const readingTime = Math.ceil(wordCount / 200) || 1;
+  const progressPercentage = Math.min((wordCount / 300) * 100, 100);
+
+  const noteLevel = useMemo(() => {
+    if (wordCount === 0) return "Empty Note 🗒️";
+    if (wordCount < 50) return "Quick Memo 📝";
+    if (wordCount >= 50 && wordCount < 150) return "Study Outline 📌";
+    if (wordCount >= 150 && wordCount < 300) return "Lecture Outline 📚";
+    return "Comprehensive Guide 🎓";
+  }, [wordCount]);
+
+  // Word & Character count helper for saved note view mode
+  const viewWordCount = selectedNote?.notes.trim() ? selectedNote.notes.trim().split(/\s+/).length : 0;
+  const viewCharCount = selectedNote?.notes.length || 0;
+
+  const viewReadingTime = Math.ceil(viewWordCount / 200) || 1;
+  const viewProgressPercentage = Math.min((viewWordCount / 300) * 100, 100);
+
+  const viewNoteLevel = selectedNote ? (
+    viewWordCount === 0 ? "Empty Note 🗒️" :
+    viewWordCount < 50 ? "Quick Memo 📝" :
+    viewWordCount >= 50 && viewWordCount < 150 ? "Study Outline 📌" :
+    viewWordCount >= 150 && viewWordCount < 300 ? "Lecture Outline 📚" :
+    "Comprehensive Guide 🎓"
+  ) : "Empty Note 🗒️";
 
   return (
     <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto h-[calc(100dvh-120px)] md:h-full gap-4 min-h-0 min-w-0 overflow-x-hidden">
@@ -358,11 +798,122 @@ export default function NotebookPage() {
         )}
 
         {/* PANEL 3: WRITING AREA / VIEW PANEL */}
-        <Card className="flex flex-col h-[75vh] border bg-background rounded-2xl shadow-md overflow-hidden relative border-primary/10 transition-all duration-300">
-          <ScrollArea className="flex-grow">
+        <Card className={cn(
+          "flex flex-col h-[75vh] border bg-background rounded-2xl shadow-md overflow-hidden relative border-primary/10 transition-all duration-300",
+          isEditing && !editPreviewMode && "ring-2 ring-primary/20 shadow-lg border-primary/30"
+        )}>
+          {isEditing && (
+            /* Markdown Editor Toolbar */
+            <div className="flex flex-wrap items-center gap-1.5 p-2 bg-muted/40 border-b border-muted/50 shrink-0">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleInsertMarkdown('bold')}
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                title="Bold"
+              >
+                <Bold className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleInsertMarkdown('italic')}
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                title="Italic"
+              >
+                <Italic className="h-4 w-4" />
+              </Button>
+              <div className="h-4 w-[1px] bg-muted-foreground/20 mx-1" />
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleInsertMarkdown('heading')}
+                className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg text-xs font-bold font-headline"
+                title="Heading 1"
+              >
+                H1
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleInsertMarkdown('subheading')}
+                className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg text-xs font-bold font-headline"
+                title="Heading 2"
+              >
+                H2
+              </Button>
+              <div className="h-4 w-[1px] bg-muted-foreground/20 mx-1" />
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleInsertMarkdown('bullet')}
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                title="Bullet List"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleInsertMarkdown('todo')}
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                title="Checklist"
+              >
+                <CheckSquare className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleInsertMarkdown('quote')}
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                title="Blockquote"
+              >
+                <Quote className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleInsertMarkdown('code')}
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                title="Code Block"
+              >
+                <Code className="h-4 w-4" />
+              </Button>
+
+              {/* Segmented Write vs Preview control */}
+              <div className="ml-auto flex items-center bg-muted/60 p-0.5 rounded-lg border border-muted-foreground/10 shrink-0">
+                <Button
+                  size="sm"
+                  variant={!editPreviewMode ? "secondary" : "ghost"}
+                  onClick={() => setEditPreviewMode(false)}
+                  className={cn("h-7 rounded-md text-[11px] font-semibold px-2.5", !editPreviewMode && "shadow-sm bg-background text-foreground")}
+                >
+                  Write
+                </Button>
+                <Button
+                  size="sm"
+                  variant={editPreviewMode ? "secondary" : "ghost"}
+                  onClick={() => setEditPreviewMode(true)}
+                  className={cn("h-7 rounded-md text-[11px] font-semibold px-2.5", editPreviewMode && "shadow-sm bg-background text-foreground")}
+                >
+                  Preview
+                </Button>
+              </div>
+            </div>
+          )}
+
             {isEditing ? (
-              <div className="flex flex-col gap-4 p-6 h-full animate-in fade-in-20 duration-200">
-                <div className="flex justify-between items-center pb-4 border-b border-muted/50">
+              <div className="flex-1 flex flex-col gap-4 p-6 min-h-0 animate-in fade-in-20 duration-200">
+                {/* Fixed Header Toolbar */}
+                <div className="flex justify-between items-center pb-4 border-b border-muted/50 shrink-0">
                   <Input
                     value={editTitle}
                     onChange={e => setEditTitle(e.target.value)}
@@ -389,26 +940,79 @@ export default function NotebookPage() {
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col min-h-[400px]">
-                  <Textarea
-                    value={editBody}
-                    onChange={e => setEditBody(e.target.value)}
-                    placeholder="Start typing your study notes here..."
-                    className="flex-1 border-none shadow-none resize-none px-0 py-2 focus-visible:ring-0 text-md leading-relaxed font-sans min-h-[350px] placeholder:text-muted-foreground/45"
-                  />
-                </div>
+                {/* ONLY scroll the writing/preview canvas */}
+                <ScrollArea className="flex-1 min-h-0 w-full pr-1">
+                  {editPreviewMode ? (
+                    <div className="px-0 py-1 w-full">
+                      {renderMarkdown(editBody, handleTodoToggle)}
+                    </div>
+                  ) : (
+                    <Textarea
+                      id="note-textarea"
+                      value={editBody}
+                      onChange={e => setEditBody(e.target.value)}
+                      placeholder="Start typing your study notes here..."
+                      className="w-full border-none shadow-none resize-none px-0 py-1 focus-visible:ring-0 text-md font-sans min-h-[350px] placeholder:text-muted-foreground/45 bg-transparent"
+                      style={{
+                        backgroundImage: 'linear-gradient(rgba(59, 130, 246, 0.06) 1px, transparent 1px)',
+                        backgroundSize: '100% 2.2rem',
+                        lineHeight: '2.2rem',
+                        borderLeft: '2px solid rgba(239, 68, 68, 0.25)',
+                        paddingLeft: '1.25rem',
+                      }}
+                    />
+                  )}
+                </ScrollArea>
 
-                <div className="flex justify-between items-center text-xs text-muted-foreground/60 border-t pt-4">
-                  <div className="flex gap-4">
+                {/* Fixed Intelligent Note Stats Footer */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-muted-foreground border-t pt-4 border-muted/50 shrink-0">
+                  <div className="flex flex-wrap gap-4 items-center min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="relative h-6 w-6 shrink-0">
+                        <svg className="h-full w-full transform -rotate-90">
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                            className="stroke-muted/30"
+                            strokeWidth="2.5"
+                            fill="transparent"
+                          />
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                            className="stroke-primary transition-all duration-300"
+                            strokeWidth="2.5"
+                            fill="transparent"
+                            strokeDasharray={2 * Math.PI * 9}
+                            strokeDashoffset={2 * Math.PI * 9 - (progressPercentage / 100) * 2 * Math.PI * 9}
+                          />
+                        </svg>
+                        <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
+                          {Math.round(progressPercentage)}%
+                        </span>
+                      </div>
+                      <span className="font-semibold text-foreground/80">{noteLevel}</span>
+                    </div>
+
+                    <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
+                    
                     <span><strong>Words:</strong> {wordCount}</span>
-                    <span><strong>Characters:</strong> {charCount}</span>
+                    <span><strong>Chars:</strong> {charCount}</span>
+                    
+                    <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
+                    
+                    <span className="flex items-center gap-1"><Timer className="w-3.5 h-3.5 text-primary" /> {readingTime} min read</span>
                   </div>
-                  <span className="flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-primary" /> Markdown Supported</span>
+                  
+                  <span className="flex items-center gap-1 text-[11px] bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-full shrink-0"><Sparkles className="w-3 h-3" /> Live Markdown</span>
                 </div>
               </div>
             ) : selectedNote ? (
-              <div className="p-6 space-y-6 animate-in fade-in-20 duration-200">
-                <div className="border-b pb-4 flex justify-between items-start gap-4">
+              <div className="flex-1 flex flex-col gap-4 p-6 min-h-0 animate-in fade-in-20 duration-200">
+                {/* Fixed Viewer Header */}
+                <div className="border-b pb-4 flex justify-between items-start gap-4 shrink-0">
                   <div className="space-y-1.5">
                     <h2 className="text-2xl font-bold font-headline text-foreground">{selectedNote.title}</h2>
                     <p className="text-xs text-muted-foreground font-semibold bg-muted px-2.5 py-0.5 rounded-full inline-block">
@@ -433,14 +1037,61 @@ export default function NotebookPage() {
                     </Button>
                   </div>
                 </div>
-                <div className="whitespace-pre-wrap leading-relaxed text-md font-sans text-foreground/90 max-w-none">
-                  {selectedNote.notes || (
-                    <p className="text-muted-foreground/50 italic">No content in this note yet. Click "Edit Note" to start writing.</p>
-                  )}
+
+                {/* ONLY scroll the viewing area */}
+                <ScrollArea className="flex-1 min-h-0 w-full pr-1">
+                  <div className="leading-relaxed text-md font-sans text-foreground/90 max-w-none">
+                    {renderMarkdown(selectedNote.notes, handleTodoToggle)}
+                  </div>
+                </ScrollArea>
+
+                {/* Fixed Intelligent Note Stats Footer for Viewer */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-muted-foreground border-t pt-4 border-muted/50 shrink-0">
+                  <div className="flex flex-wrap gap-4 items-center min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="relative h-6 w-6 shrink-0">
+                        <svg className="h-full w-full transform -rotate-90">
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                            className="stroke-muted/30"
+                            strokeWidth="2.5"
+                            fill="transparent"
+                          />
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                            className="stroke-primary transition-all duration-300"
+                            strokeWidth="2.5"
+                            fill="transparent"
+                            strokeDasharray={2 * Math.PI * 9}
+                            strokeDashoffset={2 * Math.PI * 9 - (viewProgressPercentage / 100) * 2 * Math.PI * 9}
+                          />
+                        </svg>
+                        <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
+                          {Math.round(viewProgressPercentage)}%
+                        </span>
+                      </div>
+                      <span className="font-semibold text-foreground/80">{viewNoteLevel}</span>
+                    </div>
+
+                    <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
+                    
+                    <span><strong>Words:</strong> {viewWordCount}</span>
+                    <span><strong>Chars:</strong> {viewCharCount}</span>
+                    
+                    <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
+                    
+                    <span className="flex items-center gap-1"><Timer className="w-3.5 h-3.5 text-primary" /> {viewReadingTime} min read</span>
+                  </div>
+                  
+                  <span className="flex items-center gap-1 text-[11px] bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-full shrink-0"><Sparkles className="w-3 h-3" /> Live Markdown</span>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[55vh] text-center text-muted-foreground p-6">
+              <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-6">
                 <div className="bg-primary/10 p-4 rounded-full mb-4 text-primary animate-pulse">
                   <FileSignature className="h-8 w-8" />
                 </div>
@@ -455,7 +1106,6 @@ export default function NotebookPage() {
                 </p>
               </div>
             )}
-          </ScrollArea>
         </Card>
       </div>
 
@@ -573,8 +1223,8 @@ export default function NotebookPage() {
         {/* MOBILE VIEW 3: WRITING AREA / VIEW PANEL */}
         {mobileView === 'editor' && (
           <Card className="flex-1 flex flex-col border rounded-2xl overflow-hidden bg-background min-h-0 h-full">
-            <div className="p-4 border-b flex justify-between items-center gap-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground rounded-lg" onClick={() => {
+            <div className="p-4 border-b flex justify-between items-center gap-2 shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground rounded-lg shrink-0" onClick={() => {
                 setIsEditing(false);
                 setMobileView('notes');
               }}>
@@ -594,6 +1244,29 @@ export default function NotebookPage() {
                   </h2>
                 )}
               </div>
+
+              {/* Segmented Write vs Preview control for mobile editing */}
+              {isEditing && (
+                <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-muted-foreground/10 shrink-0 ml-2">
+                  <Button
+                    size="sm"
+                    variant={!editPreviewMode ? "secondary" : "ghost"}
+                    onClick={() => setEditPreviewMode(false)}
+                    className={cn("h-7 rounded-md text-[10px] font-semibold px-2", !editPreviewMode && "shadow-sm bg-background text-foreground")}
+                  >
+                    Write
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={editPreviewMode ? "secondary" : "ghost"}
+                    onClick={() => setEditPreviewMode(true)}
+                    className={cn("h-7 rounded-md text-[10px] font-semibold px-2", editPreviewMode && "shadow-sm bg-background text-foreground")}
+                  >
+                    Prev
+                  </Button>
+                </div>
+              )}
+
               <div className="flex items-center gap-1 shrink-0 ml-auto">
                 {isEditing ? (
                   <Button onClick={handleSave} size="sm" className="bg-primary text-primary-foreground h-8 px-3 rounded-lg flex items-center">
@@ -617,30 +1290,201 @@ export default function NotebookPage() {
               </div>
             </div>
 
-            <ScrollArea className="flex-grow p-4">
-              {isEditing ? (
-                <div className="flex flex-col gap-3 min-h-[300px]">
-                  <Textarea
-                    value={editBody}
-                    onChange={e => setEditBody(e.target.value)}
-                    placeholder="Type your notes here..."
-                    className="flex-grow border-none shadow-none resize-none px-0 py-0 focus-visible:ring-0 text-sm leading-relaxed min-h-[250px]"
-                  />
-                  <div className="flex justify-between items-center text-[10px] text-muted-foreground/60 border-t pt-2 mt-auto">
-                    <span>W: {wordCount} | C: {charCount}</span>
+            {/* Mobile Markdown Toolbar */}
+            {isEditing && !editPreviewMode && (
+              <div className="flex items-center gap-1 p-1.5 bg-muted/30 border-b border-muted/50 overflow-x-auto shrink-0 scrollbar-none select-none">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleInsertMarkdown('bold')}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg shrink-0"
+                >
+                  <Bold className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleInsertMarkdown('italic')}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg shrink-0"
+                >
+                  <Italic className="h-3.5 w-3.5" />
+                </Button>
+                <div className="h-4 w-[1px] bg-muted-foreground/20 mx-0.5 shrink-0" />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleInsertMarkdown('heading')}
+                  className="h-7 px-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg text-[10px] font-bold shrink-0 font-headline"
+                >
+                  H1
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleInsertMarkdown('subheading')}
+                  className="h-7 px-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg text-[10px] font-bold shrink-0 font-headline"
+                >
+                  H2
+                </Button>
+                <div className="h-4 w-[1px] bg-muted-foreground/20 mx-0.5 shrink-0" />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleInsertMarkdown('bullet')}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg shrink-0"
+                >
+                  <List className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleInsertMarkdown('todo')}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg shrink-0"
+                >
+                  <CheckSquare className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleInsertMarkdown('quote')}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg shrink-0"
+                >
+                  <Quote className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleInsertMarkdown('code')}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg shrink-0"
+                >
+                  <Code className="h-3.5 w-3.5" />
+                </Button>
+                
+              </div>
+            )}
+
+            {isEditing ? (
+              <div className="flex-1 flex flex-col gap-3 p-4 min-h-0">
+                {/* Scrollable Mobile Editor Canvas */}
+                <ScrollArea className="flex-1 min-h-0 w-full">
+                  {editPreviewMode ? (
+                    <div className="px-0 py-1 min-h-[250px] w-full">
+                      {renderMarkdown(editBody, handleTodoToggle)}
+                    </div>
+                  ) : (
+                    <Textarea
+                      id="note-textarea-mobile"
+                      value={editBody}
+                      onChange={e => setEditBody(e.target.value)}
+                      placeholder="Type your notes here..."
+                      className="w-full border-none shadow-none resize-none px-0 py-1 focus-visible:ring-0 text-sm font-sans min-h-[250px] placeholder:text-muted-foreground/45 bg-transparent"
+                      style={{
+                        backgroundImage: 'linear-gradient(rgba(59, 130, 245, 0.05) 1px, transparent 1px)',
+                        backgroundSize: '100% 2.2rem',
+                        lineHeight: '2.2rem',
+                        borderLeft: '2px solid rgba(239, 68, 68, 0.25)',
+                        paddingLeft: '1.25rem',
+                      }}
+                    />
+                  )}
+                </ScrollArea>
+                
+                {/* Pinned Intelligent Stats Row for Mobile Editor */}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground border-t pt-3 shrink-0 select-none">
+                  <div className="flex items-center gap-1">
+                    <div className="relative h-5 w-5 shrink-0">
+                      <svg className="h-full w-full transform -rotate-90">
+                        <circle
+                          cx="10"
+                          cy="10"
+                          r="8"
+                          className="stroke-muted/30"
+                          strokeWidth="2"
+                          fill="transparent"
+                        />
+                        <circle
+                          cx="10"
+                          cy="10"
+                          r="8"
+                          className="stroke-primary transition-all duration-300"
+                          strokeWidth="2"
+                          fill="transparent"
+                          strokeDasharray={2 * Math.PI * 8}
+                          strokeDashoffset={2 * Math.PI * 8 - (progressPercentage / 100) * 2 * Math.PI * 8}
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-foreground">
+                        {Math.round(progressPercentage)}%
+                      </span>
+                    </div>
+                    <span className="font-bold text-foreground/80 text-[10px]">{noteLevel}</span>
                   </div>
+                  <div className="h-2.5 w-[1px] bg-muted-foreground/20" />
+                  <span>W: {wordCount} | C: {charCount}</span>
+                  <div className="h-2.5 w-[1px] bg-muted-foreground/20" />
+                  <span className="flex items-center gap-0.5"><Timer className="w-3.5 h-3.5 text-primary" /> {readingTime} min</span>
                 </div>
-              ) : selectedNote ? (
-                <div className="space-y-4">
+              </div>
+            ) : selectedNote ? (
+              <div className="flex-1 flex flex-col gap-3 p-4 min-h-0 animate-in fade-in-20 duration-200">
+                <div className="shrink-0">
                   <p className="text-[10px] text-muted-foreground/75 font-semibold bg-muted inline-block px-2.5 py-0.5 rounded-full">
                     {selectedNote.createdAt?.toDate ? format(selectedNote.createdAt.toDate(), "MMMM d, yyyy") : 'Just now'}
                   </p>
-                  <div className="whitespace-pre-wrap leading-relaxed text-sm font-sans text-foreground/90">
-                    {selectedNote.notes || "No content."}
-                  </div>
                 </div>
-              ) : null}
-            </ScrollArea>
+                
+                {/* Scrollable Mobile Viewer Canvas */}
+                <ScrollArea className="flex-1 min-h-0 w-full">
+                  <div className="leading-relaxed text-sm font-sans text-foreground/90 max-w-none">
+                    {renderMarkdown(selectedNote.notes, handleTodoToggle)}
+                  </div>
+                </ScrollArea>
+
+                {/* Pinned Intelligent Stats Row for Mobile Viewer */}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground border-t pt-3 shrink-0 select-none">
+                  <div className="flex items-center gap-1">
+                    <div className="relative h-5 w-5 shrink-0">
+                      <svg className="h-full w-full transform -rotate-90">
+                        <circle
+                          cx="10"
+                          cy="10"
+                          r="8"
+                          className="stroke-muted/30"
+                          strokeWidth="2"
+                          fill="transparent"
+                        />
+                        <circle
+                          cx="10"
+                          cy="10"
+                          r="8"
+                          className="stroke-primary transition-all duration-300"
+                          strokeWidth="2"
+                          fill="transparent"
+                          strokeDasharray={2 * Math.PI * 8}
+                          strokeDashoffset={2 * Math.PI * 8 - (viewProgressPercentage / 100) * 2 * Math.PI * 8}
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-foreground">
+                        {Math.round(viewProgressPercentage)}%
+                      </span>
+                    </div>
+                    <span className="font-bold text-foreground/80 text-[10px]">{viewNoteLevel}</span>
+                  </div>
+                  <div className="h-2.5 w-[1px] bg-muted-foreground/20" />
+                  <span>W: {viewWordCount} | C: {viewCharCount}</span>
+                  <div className="h-2.5 w-[1px] bg-muted-foreground/20" />
+                  <span className="flex items-center gap-0.5"><Timer className="w-3.5 h-3.5 text-primary" /> {viewReadingTime} min</span>
+                </div>
+              </div>
+            ) : null}
           </Card>
         )}
       </div>
