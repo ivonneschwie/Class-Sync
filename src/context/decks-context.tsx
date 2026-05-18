@@ -1,9 +1,9 @@
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
-import { collection, doc, serverTimestamp } from 'firebase/firestore';
+import { createContext, useContext, ReactNode, useMemo } from 'react';
+import { collection } from 'firebase/firestore';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { FlashcardService } from '@/services/FlashcardService';
 import type { FlashcardDeck } from '@/lib/types';
 
 type DecksContextType = {
@@ -25,19 +25,20 @@ export function DecksProvider({ children }: { children: ReactNode }) {
   
   const { data: decks } = useCollection<FlashcardDeck>(decksRef);
 
+  // Initialize Object-Oriented Flashcard Service
+  const flashcardService = useMemo(() => {
+    if (!firestore || !decksRef) return null;
+    return new FlashcardService(firestore, decksRef);
+  }, [firestore, decksRef]);
+
   const addDeck = (deck: Omit<FlashcardDeck, 'id' | 'createdAt' | 'userId'>) => {
-    if (!decksRef || !user) return;
-    addDocumentNonBlocking(decksRef, { 
-        ...deck,
-        userId: user.uid,
-        createdAt: serverTimestamp() 
-    });
+    if (!flashcardService || !user) return;
+    flashcardService.add(deck, user.uid);
   };
 
   const deleteDeck = (id: string) => {
-    if (!decksRef || !firestore) return;
-    const docRef = doc(firestore, decksRef.path, id);
-    deleteDocumentNonBlocking(docRef);
+    if (!flashcardService) return;
+    flashcardService.delete(id);
   };
 
   return (

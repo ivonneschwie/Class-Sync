@@ -1,9 +1,9 @@
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
-import { collection, doc, serverTimestamp } from 'firebase/firestore';
+import { createContext, useContext, ReactNode, useMemo } from 'react';
+import { collection } from 'firebase/firestore';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { NotebookService } from '@/services/NotebookService';
 import type { Summary } from '@/lib/types';
 
 type SummariesContextType = {
@@ -26,25 +26,25 @@ export function SummariesProvider({ children }: { children: ReactNode }) {
 
   const { data: summaries } = useCollection<Summary>(summariesRef);
 
+  // Initialize Object-Oriented Notebook Service
+  const notebookService = useMemo(() => {
+    if (!firestore || !summariesRef) return null;
+    return new NotebookService(firestore, summariesRef);
+  }, [firestore, summariesRef]);
+
   const addSummary = (summary: Omit<Summary, 'id' | 'createdAt' | 'userId'>) => {
-    if (!summariesRef || !user) return;
-    addDocumentNonBlocking(summariesRef, { 
-      ...summary, 
-      userId: user.uid,
-      createdAt: serverTimestamp() 
-    });
+    if (!notebookService || !user) return;
+    notebookService.add(summary, user.uid);
   };
 
   const deleteSummary = (id: string) => {
-    if (!summariesRef || !firestore) return;
-    const docRef = doc(firestore, summariesRef.path, id);
-    deleteDocumentNonBlocking(docRef);
+    if (!notebookService) return;
+    notebookService.delete(id);
   };
 
   const updateSummary = (id: string, updates: Partial<Summary>) => {
-    if (!summariesRef || !firestore) return;
-    const docRef = doc(firestore, summariesRef.path, id);
-    setDocumentNonBlocking(docRef, updates, { merge: true });
+    if (!notebookService) return;
+    notebookService.update(id, updates);
   };
 
   return (
