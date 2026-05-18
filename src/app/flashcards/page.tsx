@@ -71,7 +71,7 @@ export default function FlashcardsPage() {
                     <DialogHeader>
                         <DialogTitle className="font-headline">Create a New Flashcard Deck</DialogTitle>
                         <CardDescription>
-                            The AI will create questions and answers based on your selected notes.
+                            Manually create questions and answers for your deck.
                         </CardDescription>
                     </DialogHeader>
                     <div className="flex-grow overflow-y-auto pr-6 -mr-6">

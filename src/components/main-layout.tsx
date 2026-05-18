@@ -43,14 +43,9 @@ const navItems = [
     label: 'Time Table',
   },
   {
-    href: '/summarizer',
-    icon: Bot,
-    label: 'AI Summarizer',
-  },
-  {
-    href: '/lesson-catalog',
+    href: '/notebook',
     icon: BookOpen,
-    label: 'Lesson Catalog',
+    label: 'Notebook',
   },
   {
     href: '/flashcards',
