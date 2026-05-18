@@ -27,18 +27,18 @@ export default function NotebookPage() {
   const { summaries: notes, addSummary: addNote, deleteSummary: deleteNote, updateSummary: updateNote } = useSummaries();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  
+
   // Use class names as subjects
   const subjects = useMemo(() => Array.from(new Set(classes.map(c => c.name))).sort(), [classes]);
-  
+
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<Summary | null>(null);
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editBody, setEditBody] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Navigation panel toggle (Desktop)
   const [showNav, setShowNav] = useState(true);
 
@@ -50,118 +50,118 @@ export default function NotebookPage() {
 
   // Set initial subject on load
   useEffect(() => {
-      if (subjects.length > 0 && !selectedSubject) {
-          setSelectedSubject(subjects[0]);
-      }
+    if (subjects.length > 0 && !selectedSubject) {
+      setSelectedSubject(subjects[0]);
+    }
   }, [subjects, selectedSubject]);
 
   const subjectNotes = useMemo(() => {
-      if (!selectedSubject) return [];
-      let filtered = notes.filter(n => n.subject === selectedSubject);
-      if (searchQuery.trim()) {
-          filtered = filtered.filter(n => 
-              n.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-              n.notes.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-      }
-      return filtered.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+    if (!selectedSubject) return [];
+    let filtered = notes.filter(n => n.subject === selectedSubject);
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(n =>
+        n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        n.notes.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return filtered.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
   }, [notes, selectedSubject, searchQuery]);
 
   // Sync edit states when selecting a note
   useEffect(() => {
-      if (selectedNote) {
-          setEditTitle(selectedNote.title);
-          setEditBody(selectedNote.notes);
-      } else {
-          setEditTitle('');
-          setEditBody('');
-      }
+    if (selectedNote) {
+      setEditTitle(selectedNote.title);
+      setEditBody(selectedNote.notes);
+    } else {
+      setEditTitle('');
+      setEditBody('');
+    }
   }, [selectedNote]);
 
   const handleSelectSubject = (subject: string) => {
-      setSelectedSubject(subject);
-      setSearchQuery('');
-      setSelectedNote(null);
-      setIsEditing(false);
-      if (isMobile) {
-          setMobileView('notes');
-      }
+    setSelectedSubject(subject);
+    setSearchQuery('');
+    setSelectedNote(null);
+    setIsEditing(false);
+    if (isMobile) {
+      setMobileView('notes');
+    }
   };
 
   const handleSelectNote = (note: Summary) => {
-      setSelectedNote(note);
-      setIsEditing(false);
-      if (isMobile) {
-          setMobileView('editor');
-      }
+    setSelectedNote(note);
+    setIsEditing(false);
+    if (isMobile) {
+      setMobileView('editor');
+    }
   };
 
   const handleCreateNew = () => {
-      setSelectedNote(null);
-      setEditTitle('');
-      setEditBody('');
-      setIsEditing(true);
-      if (isMobile) {
-          setMobileView('editor');
-      }
+    setSelectedNote(null);
+    setEditTitle('');
+    setEditBody('');
+    setIsEditing(true);
+    if (isMobile) {
+      setMobileView('editor');
+    }
   };
 
   const handleEdit = () => {
-      if (selectedNote) {
-          setEditTitle(selectedNote.title);
-          setEditBody(selectedNote.notes);
-          setIsEditing(true);
-      }
+    if (selectedNote) {
+      setEditTitle(selectedNote.title);
+      setEditBody(selectedNote.notes);
+      setIsEditing(true);
+    }
   };
 
   const handleSave = () => {
-      if (!selectedSubject) return;
-      if (!editTitle.trim()) {
-          toast({ title: 'Title Required', description: 'Please enter a title for your note.', variant: 'destructive' });
-          return;
-      }
-      
-      if (selectedNote) {
-          updateNote(selectedNote.id, {
-              title: editTitle,
-              notes: editBody,
-          });
-          toast({ title: 'Success', description: 'Note updated successfully!' });
-      } else {
-          addNote({
-              title: editTitle,
-              notes: editBody,
-              subject: selectedSubject,
-              summary: '',
-              clarificationQuestions: ''
-          });
-          toast({ title: 'Success', description: 'Note created successfully!' });
-      }
-      setIsEditing(false);
-      if (isMobile) {
-          setMobileView('notes');
-      }
+    if (!selectedSubject) return;
+    if (!editTitle.trim()) {
+      toast({ title: 'Title Required', description: 'Please enter a title for your note.', variant: 'destructive' });
+      return;
+    }
+
+    if (selectedNote) {
+      updateNote(selectedNote.id, {
+        title: editTitle,
+        notes: editBody,
+      });
+      toast({ title: 'Success', description: 'Note updated successfully!' });
+    } else {
+      addNote({
+        title: editTitle,
+        notes: editBody,
+        subject: selectedSubject,
+        summary: '',
+        clarificationQuestions: ''
+      });
+      toast({ title: 'Success', description: 'Note created successfully!' });
+    }
+    setIsEditing(false);
+    if (isMobile) {
+      setMobileView('notes');
+    }
   };
 
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
-      e.stopPropagation();
-      setNoteIdToDelete(id);
-      setDialogOpen(true);
+    e.stopPropagation();
+    setNoteIdToDelete(id);
+    setDialogOpen(true);
   };
 
   const confirmDelete = () => {
-      if (noteIdToDelete) {
-          deleteNote(noteIdToDelete);
-          toast({ title: "Note Deleted", description: "Your note was deleted successfully." });
-          if (selectedNote?.id === noteIdToDelete) {
-              setSelectedNote(null);
-              if (isMobile) {
-                  setMobileView('notes');
-              }
-          }
+    if (noteIdToDelete) {
+      deleteNote(noteIdToDelete);
+      toast({ title: "Note Deleted", description: "Your note was deleted successfully." });
+      if (selectedNote?.id === noteIdToDelete) {
+        setSelectedNote(null);
+        if (isMobile) {
+          setMobileView('notes');
+        }
       }
-      setDialogOpen(false);
-      setNoteIdToDelete(null);
+    }
+    setDialogOpen(false);
+    setNoteIdToDelete(null);
   };
 
   // Word & Character count helper
@@ -170,13 +170,13 @@ export default function NotebookPage() {
 
   return (
     <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto h-[calc(100dvh-120px)] md:h-full gap-4 min-h-0 min-w-0 overflow-x-hidden">
-      
+
       {/* Top Navigation & Controls Bar (Desktop collapse triggers here) */}
-      <div className="flex items-center gap-3 px-1 border-b pb-3 border-muted/30">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setShowNav(!showNav)} 
+      <div className="flex items-center gap-3 px-1 border-b pb-3 border-muted/30 w-full min-w-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowNav(!showNav)}
           className="hidden md:flex h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-muted/70 rounded-xl transition-all"
           title={showNav ? "Hide Navigation" : "Show Navigation"}
         >
@@ -186,20 +186,22 @@ export default function NotebookPage() {
         {/* Notebook Name Selector (Always active) */}
         {selectedSubject ? (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 font-headline font-bold text-lg px-3 py-2 hover:bg-muted/65 rounded-xl transition-all max-w-[180px] xs:max-w-[240px] sm:max-w-none">
-                <Book className="h-5 w-5 text-primary shrink-0" />
-                <span className="truncate">{selectedSubject}</span>
+            <DropdownMenuTrigger asChild className="flex-1 md:flex-initial min-w-0 max-w-[90vw] sm:max-w-none">
+              <Button variant="ghost" className="flex items-center justify-between md:justify-start w-full md:w-auto gap-2 font-headline font-bold text-lg px-3 py-2 hover:bg-muted/65 rounded-xl transition-all">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Book className="h-5 w-5 text-primary shrink-0" />
+                  <span className="truncate">{selectedSubject}</span>
+                </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" collisionPadding={16} className="w-[calc(100vw-32px)] sm:w-60 rounded-xl shadow-lg border border-primary/10 p-1.5">
               {subjects.map(subject => (
-                <DropdownMenuItem 
-                  key={subject} 
+                <DropdownMenuItem
+                  key={subject}
                   onClick={() => handleSelectSubject(subject)}
                   className={cn(
-                    "rounded-lg py-2.5 px-3 cursor-pointer text-sm font-headline transition-all flex items-center min-w-0 w-full", 
+                    "rounded-lg py-2.5 px-3 cursor-pointer text-sm font-headline transition-all flex items-center min-w-0 w-full",
                     selectedSubject === subject ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted"
                   )}
                 >
@@ -226,7 +228,7 @@ export default function NotebookPage() {
         "hidden md:grid flex-1 gap-6",
         showNav ? "md:grid-cols-[240px_320px_1fr]" : "md:grid-cols-1"
       )}>
-        
+
         {/* PANEL 1: SUBJECT SHELF (Hidden when collapsed) */}
         {showNav && (
           <Card className="flex flex-col h-[75vh] border bg-background/50 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden animate-in slide-in-from-left-4 duration-200">
@@ -252,8 +254,8 @@ export default function NotebookPage() {
                         onClick={() => handleSelectSubject(subject)}
                         className={cn(
                           "w-full text-left p-3 rounded-xl text-sm font-medium transition-all duration-200 flex justify-between items-center group relative overflow-hidden",
-                          selectedSubject === subject 
-                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-[1.02]" 
+                          selectedSubject === subject
+                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-[1.02]"
                             : "hover:bg-muted border border-transparent hover:border-muted-foreground/10"
                         )}
                       >
@@ -281,10 +283,10 @@ export default function NotebookPage() {
                 <CardTitle className="font-headline text-md font-semibold text-muted-foreground uppercase tracking-wider">
                   Notes
                 </CardTitle>
-                <Button 
-                  onClick={handleCreateNew} 
+                <Button
+                  onClick={handleCreateNew}
                   disabled={!selectedSubject}
-                  size="sm" 
+                  size="sm"
                   className="h-8 px-2.5 bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary transition-all rounded-lg"
                 >
                   <Plus className="h-4 w-4 mr-1" /> New Note
@@ -361,15 +363,15 @@ export default function NotebookPage() {
             {isEditing ? (
               <div className="flex flex-col gap-4 p-6 h-full animate-in fade-in-20 duration-200">
                 <div className="flex justify-between items-center pb-4 border-b border-muted/50">
-                  <Input 
+                  <Input
                     value={editTitle}
                     onChange={e => setEditTitle(e.target.value)}
                     placeholder="E.g., Lecture 1: Core Concepts"
                     className="text-xl font-bold font-headline max-w-md bg-transparent border-none shadow-none px-0 focus-visible:ring-0 focus-visible:border-none text-foreground placeholder:text-muted-foreground/50"
                   />
                   <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => {
                         setIsEditing(false);
                         if (!selectedNote && subjectNotes.length > 0) setSelectedNote(subjectNotes[0]);
@@ -378,17 +380,17 @@ export default function NotebookPage() {
                     >
                       Cancel
                     </Button>
-                    <Button 
-                      onClick={handleSave} 
+                    <Button
+                      onClick={handleSave}
                       className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm rounded-xl px-4"
                     >
                       <Save className="w-4 h-4 mr-2" /> Save Note
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="flex-1 flex flex-col min-h-[400px]">
-                  <Textarea 
+                  <Textarea
                     value={editBody}
                     onChange={e => setEditBody(e.target.value)}
                     placeholder="Start typing your study notes here..."
@@ -414,9 +416,9 @@ export default function NotebookPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={handleEdit} 
+                    <Button
+                      variant="outline"
+                      onClick={handleEdit}
                       className="rounded-xl hover:bg-primary/5 hover:text-primary hover:border-primary/20"
                     >
                       <Edit3 className="w-4 h-4 mr-2" /> Edit Note
@@ -508,12 +510,12 @@ export default function NotebookPage() {
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground rounded-lg" onClick={() => setMobileView('subjects')}>
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="font-headline text-sm font-bold text-foreground truncate">
+                <div className="flex-1 min-w-0 max-w-[140px] xs:max-w-[180px] sm:max-w-[300px]">
+                  <span className="font-headline text-sm font-bold text-foreground truncate block">
                     {selectedSubject}
-                  </CardTitle>
+                  </span>
                 </div>
-                <Button onClick={handleCreateNew} size="sm" className="h-8 bg-primary text-primary-foreground px-3 rounded-lg flex items-center">
+                <Button onClick={handleCreateNew} size="sm" className="h-8 bg-primary text-primary-foreground px-3 rounded-lg flex items-center ml-auto shrink-0">
                   <Plus className="h-3.5 w-3.5 mr-1" /> Add
                 </Button>
               </div>
@@ -578,9 +580,9 @@ export default function NotebookPage() {
               }}>
                 <ChevronLeft className="h-5 w-5" />
               </Button>
-              <div className="flex-grow min-w-0">
+              <div className="flex-grow min-w-0 max-w-[130px] xs:max-w-[160px] sm:max-w-[300px]">
                 {isEditing ? (
-                  <Input 
+                  <Input
                     value={editTitle}
                     onChange={e => setEditTitle(e.target.value)}
                     placeholder="Note Title"
@@ -592,7 +594,7 @@ export default function NotebookPage() {
                   </h2>
                 )}
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 ml-auto">
                 {isEditing ? (
                   <Button onClick={handleSave} size="sm" className="bg-primary text-primary-foreground h-8 px-3 rounded-lg flex items-center">
                     <Save className="w-3.5 h-3.5 mr-1" /> Save
@@ -618,7 +620,7 @@ export default function NotebookPage() {
             <ScrollArea className="flex-grow p-4">
               {isEditing ? (
                 <div className="flex flex-col gap-3 min-h-[300px]">
-                  <Textarea 
+                  <Textarea
                     value={editBody}
                     onChange={e => setEditBody(e.target.value)}
                     placeholder="Type your notes here..."
@@ -644,20 +646,20 @@ export default function NotebookPage() {
       </div>
 
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <AlertDialogContent className="w-[90%] sm:max-w-md rounded-2xl">
-              <AlertDialogHeader>
-                  <AlertDialogTitle className="font-headline font-bold">Delete Note?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-sm">
-                      This action cannot be undone. This note will be permanently removed.
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                  <AlertDialogCancel onClick={() => setNoteIdToDelete(null)} className="rounded-xl">Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
-                      Delete
-                  </AlertDialogAction>
-              </AlertDialogFooter>
-          </AlertDialogContent>
+        <AlertDialogContent className="w-[90%] sm:max-w-md rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-headline font-bold">Delete Note?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              This action cannot be undone. This note will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => setNoteIdToDelete(null)} className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );
