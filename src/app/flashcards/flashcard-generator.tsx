@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { generateFlashcards } from '@/ai/flows/generate-flashcards';
 import { useSummaries } from '@/context/summaries-context';
 import { useDecks } from '@/context/decks-context';
-import type { Flashcard as FlashcardType, Summary } from '@/lib/types';
+import type { Flashcard as FlashcardType, Summary, FlashcardDeck } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -254,7 +254,7 @@ export function FlashcardGenerator({ onDeckCreated }: FlashcardGeneratorProps) {
                     <Button onClick={handleSaveDeck}><Save className="mr-2 h-4 w-4" /> Save Deck</Button>
                 </div>
             </div>
-            <FlashcardViewer deck={currentDeckForViewer as FlashcardDeck} />
+            <FlashcardViewer deck={currentDeckForViewer as any} />
           </div>
         )}
         {!isLoading && !generatedFlashcards && selectedSubject && (
