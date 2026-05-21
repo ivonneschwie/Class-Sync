@@ -114,6 +114,18 @@ export default function NotebookPage() {
     setEditPreviewMode(false);
   }, [selectedNote]);
 
+  // Auto-resize the active textarea to fit its text, allowing the outer ScrollArea to scroll
+  useEffect(() => {
+    if (isEditing && !editPreviewMode) {
+      const textareaId = isMobile && mobileView === 'editor' ? 'note-textarea-mobile' : 'note-textarea';
+      const textarea = document.getElementById(textareaId) as HTMLTextAreaElement;
+      if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      }
+    }
+  }, [editBody, isEditing, editPreviewMode, isMobile, mobileView]);
+
   const handleInsertMarkdown = (syntax: string) => {
     const isMobileTextarea = isMobile && mobileView === 'editor';
     const textareaId = isMobileTextarea ? 'note-textarea-mobile' : 'note-textarea';
@@ -696,7 +708,7 @@ export default function NotebookPage() {
                     value={editBody}
                     onChange={e => setEditBody(e.target.value)}
                     placeholder="Start typing your study notes here..."
-                    className="w-full border-none shadow-none resize-none px-0 py-1 focus-visible:ring-0 text-md font-sans min-h-[350px] placeholder:text-muted-foreground/45 bg-transparent"
+                    className="w-full border-none shadow-none resize-none px-0 py-1 focus-visible:ring-0 text-md font-sans min-h-full overflow-hidden placeholder:text-muted-foreground/45 bg-transparent"
                     style={{
                       backgroundImage: 'linear-gradient(rgba(59, 130, 246, 0.06) 1px, transparent 1px)',
                       backgroundSize: '100% 2.2rem',
@@ -1150,7 +1162,6 @@ export default function NotebookPage() {
                 >
                   <Code className="h-3.5 w-3.5" />
                 </Button>
-
               </div>
             )}
 
@@ -1159,7 +1170,7 @@ export default function NotebookPage() {
                 {/* Scrollable Mobile Editor Canvas */}
                 <ScrollArea className="flex-1 min-h-0 w-full">
                   {editPreviewMode ? (
-                    <div className="px-0 py-1 min-h-[250px] w-full">
+                    <div className="px-0 py-1 min-h-full w-full">
                       {renderMarkdown(editBody, handleTodoToggle)}
                     </div>
                   ) : (
@@ -1168,7 +1179,7 @@ export default function NotebookPage() {
                       value={editBody}
                       onChange={e => setEditBody(e.target.value)}
                       placeholder="Type your notes here..."
-                      className="w-full border-none shadow-none resize-none px-0 py-1 focus-visible:ring-0 text-sm font-sans min-h-[250px] placeholder:text-muted-foreground/45 bg-transparent"
+                      className="w-full border-none shadow-none resize-none px-0 py-1 focus-visible:ring-0 text-sm font-sans min-h-full overflow-hidden placeholder:text-muted-foreground/45 bg-transparent"
                       style={{
                         backgroundImage: 'linear-gradient(rgba(59, 130, 245, 0.05) 1px, transparent 1px)',
                         backgroundSize: '100% 2.2rem',

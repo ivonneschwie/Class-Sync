@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { FlashcardGenerator } from "./flashcard-generator";
 import { useDecks } from '@/context/decks-context';
 import type { FlashcardDeck } from '@/lib/types';
-import { Layers, PlusCircle, Trash2, ArrowLeft } from 'lucide-react';
+import { Layers, PlusCircle, Trash2, ArrowLeft, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { FlashcardViewer } from './flashcard-viewer';
 import { useToast } from '@/hooks/use-toast';
@@ -67,11 +67,13 @@ export default function FlashcardsPage() {
                         Create New Deck
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[640px] max-h-[90vh] flex flex-col">
+                <DialogContent className="sm:max-w-[720px] max-h-[90vh] flex flex-col">
                     <DialogHeader>
-                        <DialogTitle className="font-headline">Create a New Flashcard Deck</DialogTitle>
+                        <DialogTitle className="font-headline flex items-center gap-1.5">
+                            <Sparkles className="h-5 w-5 text-primary animate-pulse" /> Generate AI Flashcard Deck
+                        </DialogTitle>
                         <CardDescription>
-                            Manually create questions and answers for your deck.
+                            Specify a lecture note or a custom topic, and our AI will automatically extract key concepts to build your smart study cards.
                         </CardDescription>
                     </DialogHeader>
                     <div className="flex-grow overflow-y-auto pr-6 -mr-6">
