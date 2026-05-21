@@ -41,6 +41,11 @@ export default function NotebookPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [pendingNewNoteTitle, setPendingNewNoteTitle] = useState<string | null>(null);
 
+  // Summarize state
+  const [summary, setSummary] = useState('');
+  const [showSummary, setShowSummary] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
   // 1. Keep selectedNote in sync with the real-time notes collection
   useEffect(() => {
     if (selectedNote) {
@@ -172,7 +177,7 @@ export default function NotebookPage() {
 
   const handleTodoToggle = (targetIndex: number) => {
     const targetText = isEditing ? editBody : (selectedNote?.notes || '');
-    
+
     let currentIndex = 0;
     const toggledText = targetText.replace(/^- \[( |x)\] (.*?)$/gm, (match, checked, content) => {
       const idx = currentIndex++;
@@ -182,7 +187,7 @@ export default function NotebookPage() {
       }
       return match;
     });
-    
+
     if (isEditing) {
       setEditBody(toggledText);
     } else if (selectedNote) {
@@ -206,6 +211,8 @@ export default function NotebookPage() {
   const handleSelectNote = (note: Summary) => {
     setSelectedNote(note);
     setIsEditing(false);
+    setShowSummary(false);
+    setSummary('');
     if (isMobile) {
       setMobileView('editor');
     }
@@ -287,6 +294,34 @@ export default function NotebookPage() {
     setNoteIdToDelete(null);
   };
 
+  // Summarize the selected note via the OpenRouter API
+  const handleSummarize = async () => {
+    if (!selectedNote?.notes) {
+      toast({ title: 'No Content', description: 'Cannot summarize an empty note.', variant: 'destructive' });
+      return;
+    }
+    setIsSummarizing(true);
+    try {
+      const res = await fetch('/api/ai/openrouter/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: selectedNote.notes }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: 'Request failed' }));
+        toast({ title: 'Summarization Failed', description: errData.error || 'Unknown error', variant: 'destructive' });
+        return;
+      }
+      const data = await res.json();
+      setSummary(data.summary || 'No summary was returned.');
+      setShowSummary(true);
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to summarize note.', variant: 'destructive' });
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
   // Word & Character count helper for edit mode
   const wordCount = editBody.trim() ? editBody.trim().split(/\s+/).length : 0;
   const charCount = editBody.length;
@@ -311,10 +346,10 @@ export default function NotebookPage() {
 
   const viewNoteLevel = selectedNote ? (
     viewWordCount === 0 ? "Empty Note 🗒️" :
-    viewWordCount < 50 ? "Quick Memo 📝" :
-    viewWordCount >= 50 && viewWordCount < 150 ? "Study Outline 📌" :
-    viewWordCount >= 150 && viewWordCount < 300 ? "Lecture Outline 📚" :
-    "Comprehensive Guide 🎓"
+      viewWordCount < 50 ? "Quick Memo 📝" :
+        viewWordCount >= 50 && viewWordCount < 150 ? "Study Outline 📌" :
+          viewWordCount >= 150 && viewWordCount < 300 ? "Lecture Outline 📚" :
+            "Comprehensive Guide 🎓"
   ) : "Empty Note 🗒️";
 
   return (
@@ -619,202 +654,238 @@ export default function NotebookPage() {
             </div>
           )}
 
-            {isEditing ? (
-              <div className="flex-1 flex flex-col gap-4 p-6 min-h-0 animate-in fade-in-20 duration-200">
-                {/* Fixed Header Toolbar */}
-                <div className="flex justify-between items-center pb-4 border-b border-muted/50 shrink-0">
-                  <Input
-                    value={editTitle}
-                    onChange={e => setEditTitle(e.target.value)}
-                    placeholder="E.g., Lecture 1: Core Concepts"
-                    className="text-xl font-bold font-headline max-w-md bg-transparent border-none shadow-none px-0 focus-visible:ring-0 focus-visible:border-none text-foreground placeholder:text-muted-foreground/50"
-                  />
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsEditing(false);
-                        if (!selectedNote && subjectNotes.length > 0) setSelectedNote(subjectNotes[0]);
-                      }}
-                      className="rounded-xl"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleSave}
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm rounded-xl px-4"
-                    >
-                      <Save className="w-4 h-4 mr-2" /> Save Note
-                    </Button>
-                  </div>
-                </div>
-
-                {/* ONLY scroll the writing/preview canvas */}
-                <ScrollArea className="flex-1 min-h-0 w-full pr-1">
-                  {editPreviewMode ? (
-                    <div className="px-0 py-1 w-full">
-                      {renderMarkdown(editBody, handleTodoToggle)}
-                    </div>
-                  ) : (
-                    <Textarea
-                      id="note-textarea"
-                      value={editBody}
-                      onChange={e => setEditBody(e.target.value)}
-                      placeholder="Start typing your study notes here..."
-                      className="w-full border-none shadow-none resize-none px-0 py-1 focus-visible:ring-0 text-md font-sans min-h-[350px] placeholder:text-muted-foreground/45 bg-transparent"
-                      style={{
-                        backgroundImage: 'linear-gradient(rgba(59, 130, 246, 0.06) 1px, transparent 1px)',
-                        backgroundSize: '100% 2.2rem',
-                        lineHeight: '2.2rem',
-                        borderLeft: '2px solid rgba(239, 68, 68, 0.25)',
-                        paddingLeft: '1.25rem',
-                      }}
-                    />
-                  )}
-                </ScrollArea>
-
-                {/* Fixed Intelligent Note Stats Footer */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-muted-foreground border-t pt-4 border-muted/50 shrink-0">
-                  <div className="flex flex-wrap gap-4 items-center min-w-0">
-                    <div className="flex items-center gap-2">
-                      <div className="relative h-6 w-6 shrink-0">
-                        <svg className="h-full w-full transform -rotate-90">
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                            className="stroke-muted/30"
-                            strokeWidth="2.5"
-                            fill="transparent"
-                          />
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                            className="stroke-primary transition-all duration-300"
-                            strokeWidth="2.5"
-                            fill="transparent"
-                            strokeDasharray={2 * Math.PI * 9}
-                            strokeDashoffset={2 * Math.PI * 9 - (progressPercentage / 100) * 2 * Math.PI * 9}
-                          />
-                        </svg>
-                        <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
-                          {Math.round(progressPercentage)}%
-                        </span>
-                      </div>
-                      <span className="font-semibold text-foreground/80">{noteLevel}</span>
-                    </div>
-
-                    <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
-                    
-                    <span><strong>Words:</strong> {wordCount}</span>
-                    <span><strong>Chars:</strong> {charCount}</span>
-                    
-                    <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
-                    
-                    <span className="flex items-center gap-1"><Timer className="w-3.5 h-3.5 text-primary" /> {readingTime} min read</span>
-                  </div>
-                  
-                  <span className="flex items-center gap-1 text-[11px] bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-full shrink-0"><Sparkles className="w-3 h-3" /> Live Markdown</span>
+          {isEditing ? (
+            <div className="flex-1 flex flex-col gap-4 p-6 min-h-0 animate-in fade-in-20 duration-200">
+              {/* Fixed Header Toolbar */}
+              <div className="flex justify-between items-center pb-4 border-b border-muted/50 shrink-0">
+                <Input
+                  value={editTitle}
+                  onChange={e => setEditTitle(e.target.value)}
+                  placeholder="E.g., Lecture 1: Core Concepts"
+                  className="text-xl font-bold font-headline max-w-md bg-transparent border-none shadow-none px-0 focus-visible:ring-0 focus-visible:border-none text-foreground placeholder:text-muted-foreground/50"
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditing(false);
+                      if (!selectedNote && subjectNotes.length > 0) setSelectedNote(subjectNotes[0]);
+                    }}
+                    className="rounded-xl"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm rounded-xl px-4"
+                  >
+                    <Save className="w-4 h-4 mr-2" /> Save Note
+                  </Button>
                 </div>
               </div>
-            ) : selectedNote ? (
-              <div className="flex-1 flex flex-col gap-4 p-6 min-h-0 animate-in fade-in-20 duration-200">
-                {/* Fixed Viewer Header */}
-                <div className="border-b pb-4 flex justify-between items-start gap-4 shrink-0">
-                  <div className="space-y-1.5">
-                    <h2 className="text-2xl font-bold font-headline text-foreground">{selectedNote.title}</h2>
-                    <p className="text-xs text-muted-foreground font-semibold bg-muted px-2.5 py-0.5 rounded-full inline-block">
-                      {selectedNote.createdAt?.toDate ? format(selectedNote.createdAt.toDate(), "MMMM d, yyyy") : 'Just now'}
-                    </p>
+
+              {/* ONLY scroll the writing/preview canvas */}
+              <ScrollArea className="flex-1 min-h-0 w-full pr-1">
+                {editPreviewMode ? (
+                  <div className="px-0 py-1 w-full">
+                    {renderMarkdown(editBody, handleTodoToggle)}
                   </div>
+                ) : (
+                  <Textarea
+                    id="note-textarea"
+                    value={editBody}
+                    onChange={e => setEditBody(e.target.value)}
+                    placeholder="Start typing your study notes here..."
+                    className="w-full border-none shadow-none resize-none px-0 py-1 focus-visible:ring-0 text-md font-sans min-h-[350px] placeholder:text-muted-foreground/45 bg-transparent"
+                    style={{
+                      backgroundImage: 'linear-gradient(rgba(59, 130, 246, 0.06) 1px, transparent 1px)',
+                      backgroundSize: '100% 2.2rem',
+                      lineHeight: '2.2rem',
+                      borderLeft: '2px solid rgba(239, 68, 68, 0.25)',
+                      paddingLeft: '1.25rem',
+                    }}
+                  />
+                )}
+              </ScrollArea>
+
+              {/* Fixed Intelligent Note Stats Footer */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-muted-foreground border-t pt-4 border-muted/50 shrink-0">
+                <div className="flex flex-wrap gap-4 items-center min-w-0">
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={handleEdit}
-                      className="rounded-xl hover:bg-primary/5 hover:text-primary hover:border-primary/20"
-                    >
-                      <Edit3 className="w-4 h-4 mr-2" /> Edit Note
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => handleDeleteClick(e, selectedNote.id)}
-                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl h-9 w-9"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
+                    <div className="relative h-6 w-6 shrink-0">
+                      <svg className="h-full w-full transform -rotate-90">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          className="stroke-muted/30"
+                          strokeWidth="2.5"
+                          fill="transparent"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          className="stroke-primary transition-all duration-300"
+                          strokeWidth="2.5"
+                          fill="transparent"
+                          strokeDasharray={2 * Math.PI * 9}
+                          strokeDashoffset={2 * Math.PI * 9 - (progressPercentage / 100) * 2 * Math.PI * 9}
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
+                        {Math.round(progressPercentage)}%
+                      </span>
+                    </div>
+                    <span className="font-semibold text-foreground/80">{noteLevel}</span>
                   </div>
+
+                  <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
+
+                  <span><strong>Words:</strong> {wordCount}</span>
+                  <span><strong>Chars:</strong> {charCount}</span>
+
+                  <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
+
+                  <span className="flex items-center gap-1"><Timer className="w-3.5 h-3.5 text-primary" /> {readingTime} min read</span>
                 </div>
 
-                {/* ONLY scroll the viewing area */}
-                <ScrollArea className="flex-1 min-h-0 w-full pr-1">
+                <span className="flex items-center gap-1 text-[11px] bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-full shrink-0"><Sparkles className="w-3 h-3" /> Live Markdown</span>
+              </div>
+            </div>
+          ) : selectedNote ? (
+            <div className="flex-1 flex flex-col gap-4 p-6 min-h-0 animate-in fade-in-20 duration-200">
+              {/* Fixed Viewer Header */}
+              <div className="border-b pb-4 flex justify-between items-start gap-4 shrink-0">
+                <div className="space-y-1.5">
+                  <h2 className="text-2xl font-bold font-headline text-foreground">{selectedNote.title}</h2>
+                  <p className="text-xs text-muted-foreground font-semibold bg-muted px-2.5 py-0.5 rounded-full inline-block">
+                    {selectedNote.createdAt?.toDate ? format(selectedNote.createdAt.toDate(), "MMMM d, yyyy") : 'Just now'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleEdit}
+                    className="rounded-xl hover:bg-primary/5 hover:text-primary hover:border-primary/20"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" /> Edit Note
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleSummarize}
+                    disabled={isSummarizing}
+                    className="rounded-xl hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <Sparkles className={cn("w-4 h-4 mr-2", isSummarizing && "animate-spin")} /> {isSummarizing ? 'Summarizing...' : showSummary ? 'Re-summarize' : 'Summarize'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => handleDeleteClick(e, selectedNote.id)}
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl h-9 w-9"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Segmented Note / Summary toggle */}
+              {showSummary && (
+                <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-muted-foreground/10 shrink-0 self-start">
+                  <Button
+                    size="sm"
+                    variant={!showSummary ? "secondary" : "ghost"}
+                    onClick={() => setShowSummary(false)}
+                    className={cn("h-7 rounded-md text-[11px] font-semibold px-2.5", !showSummary && "shadow-sm bg-background text-foreground")}
+                  >
+                    Note
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={showSummary ? "secondary" : "ghost"}
+                    onClick={() => setShowSummary(true)}
+                    className={cn("h-7 rounded-md text-[11px] font-semibold px-2.5", showSummary && "shadow-sm bg-background text-foreground")}
+                  >
+                    <Sparkles className="w-3 h-3 mr-1" /> Summary
+                  </Button>
+                </div>
+              )}
+
+              {/* ONLY scroll the viewing area */}
+              <ScrollArea className="flex-1 min-h-0 w-full pr-1">
+                {showSummary ? (
+                  <div className="leading-relaxed text-md font-sans text-foreground/90 max-w-none whitespace-pre-wrap">
+                    {summary}
+                  </div>
+                ) : (
                   <div className="leading-relaxed text-md font-sans text-foreground/90 max-w-none">
                     {renderMarkdown(selectedNote.notes, handleTodoToggle)}
                   </div>
-                </ScrollArea>
-
-                {/* Fixed Intelligent Note Stats Footer for Viewer */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-muted-foreground border-t pt-4 border-muted/50 shrink-0">
-                  <div className="flex flex-wrap gap-4 items-center min-w-0">
-                    <div className="flex items-center gap-2">
-                      <div className="relative h-6 w-6 shrink-0">
-                        <svg className="h-full w-full transform -rotate-90">
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                            className="stroke-muted/30"
-                            strokeWidth="2.5"
-                            fill="transparent"
-                          />
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                            className="stroke-primary transition-all duration-300"
-                            strokeWidth="2.5"
-                            fill="transparent"
-                            strokeDasharray={2 * Math.PI * 9}
-                            strokeDashoffset={2 * Math.PI * 9 - (viewProgressPercentage / 100) * 2 * Math.PI * 9}
-                          />
-                        </svg>
-                        <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
-                          {Math.round(viewProgressPercentage)}%
-                        </span>
-                      </div>
-                      <span className="font-semibold text-foreground/80">{viewNoteLevel}</span>
-                    </div>
-
-                    <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
-                    
-                    <span><strong>Words:</strong> {viewWordCount}</span>
-                    <span><strong>Chars:</strong> {viewCharCount}</span>
-                    
-                    <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
-                    
-                    <span className="flex items-center gap-1"><Timer className="w-3.5 h-3.5 text-primary" /> {viewReadingTime} min read</span>
-                  </div>
-                  
-                  <span className="flex items-center gap-1 text-[11px] bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-full shrink-0"><Sparkles className="w-3 h-3" /> Live Markdown</span>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-6">
-                <div className="bg-primary/10 p-4 rounded-full mb-4 text-primary animate-pulse">
-                  <FileSignature className="h-8 w-8" />
-                </div>
-                <h3 className="text-lg font-bold font-headline text-foreground">Write Your Notes</h3>
-                {!showNav && selectedSubject && (
-                  <Button onClick={() => setShowNav(true)} className="mt-3 bg-primary text-primary-foreground rounded-xl">
-                    <Menu className="w-4 h-4 mr-2" /> Show Navigation Pane
-                  </Button>
                 )}
-                <p className="text-sm max-w-sm pt-1">
-                  Select a note from the list, or create a brand new one to capture your lecture highlights.
-                </p>
+              </ScrollArea>
+
+              {/* Fixed Intelligent Note Stats Footer for Viewer */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-muted-foreground border-t pt-4 border-muted/50 shrink-0">
+                <div className="flex flex-wrap gap-4 items-center min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="relative h-6 w-6 shrink-0">
+                      <svg className="h-full w-full transform -rotate-90">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          className="stroke-muted/30"
+                          strokeWidth="2.5"
+                          fill="transparent"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          className="stroke-primary transition-all duration-300"
+                          strokeWidth="2.5"
+                          fill="transparent"
+                          strokeDasharray={2 * Math.PI * 9}
+                          strokeDashoffset={2 * Math.PI * 9 - (viewProgressPercentage / 100) * 2 * Math.PI * 9}
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
+                        {Math.round(viewProgressPercentage)}%
+                      </span>
+                    </div>
+                    <span className="font-semibold text-foreground/80">{viewNoteLevel}</span>
+                  </div>
+
+                  <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
+
+                  <span><strong>Words:</strong> {viewWordCount}</span>
+                  <span><strong>Chars:</strong> {viewCharCount}</span>
+
+                  <div className="h-3 w-[1px] bg-muted-foreground/20 hidden xs:block" />
+
+                  <span className="flex items-center gap-1"><Timer className="w-3.5 h-3.5 text-primary" /> {viewReadingTime} min read</span>
+                </div>
+
+                <span className="flex items-center gap-1 text-[11px] bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-full shrink-0"><Sparkles className="w-3 h-3" /> Live Markdown</span>
               </div>
-            )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-6">
+              <div className="bg-primary/10 p-4 rounded-full mb-4 text-primary animate-pulse">
+                <FileSignature className="h-8 w-8" />
+              </div>
+              <h3 className="text-lg font-bold font-headline text-foreground">Write Your Notes</h3>
+              {!showNav && selectedSubject && (
+                <Button onClick={() => setShowNav(true)} className="mt-3 bg-primary text-primary-foreground rounded-xl">
+                  <Menu className="w-4 h-4 mr-2" /> Show Navigation Pane
+                </Button>
+              )}
+              <p className="text-sm max-w-sm pt-1">
+                Select a note from the list, or create a brand new one to capture your lecture highlights.
+              </p>
+            </div>
+          )}
         </Card>
       </div>
 
@@ -986,6 +1057,9 @@ export default function NotebookPage() {
                     <Button variant="outline" size="sm" className="h-8 px-2.5 rounded-lg" onClick={handleEdit}>
                       Edit
                     </Button>
+                    <Button variant="outline" size="sm" className="h-8 px-2.5 rounded-lg" onClick={handleSummarize} disabled={isSummarizing}>
+                      <Sparkles className={cn("w-3.5 h-3.5 mr-1", isSummarizing && "animate-spin")} /> {isSummarizing ? '...' : 'Sum'}
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -1076,7 +1150,7 @@ export default function NotebookPage() {
                 >
                   <Code className="h-3.5 w-3.5" />
                 </Button>
-                
+
               </div>
             )}
 
@@ -1105,7 +1179,7 @@ export default function NotebookPage() {
                     />
                   )}
                 </ScrollArea>
-                
+
                 {/* Pinned Intelligent Stats Row for Mobile Editor */}
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground border-t pt-3 shrink-0 select-none">
                   <div className="flex items-center gap-1">
@@ -1149,12 +1223,40 @@ export default function NotebookPage() {
                     {selectedNote.createdAt?.toDate ? format(selectedNote.createdAt.toDate(), "MMMM d, yyyy") : 'Just now'}
                   </p>
                 </div>
-                
+
+                {/* Mobile Note/Summary toggle */}
+                {showSummary && (
+                  <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-muted-foreground/10 shrink-0 self-start">
+                    <Button
+                      size="sm"
+                      variant={!showSummary ? "secondary" : "ghost"}
+                      onClick={() => setShowSummary(false)}
+                      className={cn("h-7 rounded-md text-[10px] font-semibold px-2", !showSummary && "shadow-sm bg-background text-foreground")}
+                    >
+                      Note
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={showSummary ? "secondary" : "ghost"}
+                      onClick={() => setShowSummary(true)}
+                      className={cn("h-7 rounded-md text-[10px] font-semibold px-2", showSummary && "shadow-sm bg-background text-foreground")}
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" /> Summary
+                    </Button>
+                  </div>
+                )}
+
                 {/* Scrollable Mobile Viewer Canvas */}
                 <ScrollArea className="flex-1 min-h-0 w-full">
-                  <div className="leading-relaxed text-sm font-sans text-foreground/90 max-w-none">
-                    {renderMarkdown(selectedNote.notes, handleTodoToggle)}
-                  </div>
+                  {showSummary ? (
+                    <div className="leading-relaxed text-sm font-sans text-foreground/90 max-w-none whitespace-pre-wrap">
+                      {summary}
+                    </div>
+                  ) : (
+                    <div className="leading-relaxed text-sm font-sans text-foreground/90 max-w-none">
+                      {renderMarkdown(selectedNote.notes, handleTodoToggle)}
+                    </div>
+                  )}
                 </ScrollArea>
 
                 {/* Pinned Intelligent Stats Row for Mobile Viewer */}
