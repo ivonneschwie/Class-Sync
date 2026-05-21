@@ -32,9 +32,11 @@ ClassSync is a Progressive Web App (PWA) built for students to take control of t
 | 📅 **Schedule Management** | Add classes with times, locations, and instructor names. View your full weekly timetable at a glance. |
 | ⚠️ **Conflict Detection** | Automatically detects and alerts you when two classes overlap in time. |
 | 🤝 **Study Group Finder** | Browse and connect with classmates in the same courses based on study preferences. |
-| 🤖 **AI Note Summarization** | Paste lecture notes and get concise AI-generated study guides with clarifying Q&A. |
-| 🃏 **Flashcard Generator** | Auto-generate flashcard decks from your notes for quick revision. |
+| 📓 **Markdown Notebook** | Rich note editor with live Markdown preview, formatting toolbar, word/character stats, reading time estimates, and interactive checklists. |
+| 🤖 **AI Note Summarization** | Summarize lecture notes into concise study guides using the OpenRouter AI API (free tier supported). |
+| 🃏 **AI Flashcard Generator** | Auto-generate flashcard decks from your notes via OpenRouter AI. |
 | 📤 **Resource Sharing** | Share your schedule, lessons, or decks with others via unique 6-digit codes. |
+| 🎨 **16 Accent Color Themes** | Choose from 16 accent colors (lavender, red, teal, blue, etc.) that persist across sessions. |
 | 🌗 **Dark / Light Mode** | Full theme support with system preference detection. |
 | 📱 **PWA Support** | Installable on mobile and desktop as a native-like app. |
 
@@ -42,12 +44,12 @@ ClassSync is a Progressive Web App (PWA) built for students to take control of t
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router, Turbopack)
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router + Pages Router API routes, Turbopack)
 - **Language:** TypeScript 5
 - **UI Library:** [shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/)
 - **Styling:** Tailwind CSS 3
 - **Backend / Auth:** [Firebase](https://firebase.google.com/) (Firestore, Authentication)
-- **AI:** Google Genkit (via Firebase AI Logic)
+- **AI:** [OpenRouter](https://openrouter.ai/) (free-tier model routing for summarization & flashcard generation)
 - **Forms:** React Hook Form + Zod
 - **Charts:** Recharts
 - **Icons:** Lucide React
@@ -126,12 +128,17 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=           # Optional
 
-# Optional — Google AI for note summarization
-GOOGLE_GENAI_API_KEY=your_genai_api_key
+# AI Services (server-side only — NOT exposed to the browser)
+OPENROUTER_API_KEY=your_openrouter_api_key      # Required for AI summarization & flashcard generation
+GOOGLE_GENAI_API_KEY=your_genai_api_key         # Optional — for Genkit flows if used
+GEMINI_API_KEY=your_gemini_api_key              # Optional — alias for Google AI
 ```
 
-> **Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Never commit your `.env` file — it is already included in `.gitignore`.
+> **Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Server-only keys like `OPENROUTER_API_KEY` are never sent to the client. Never commit your `.env` file — it is already included in `.gitignore`.
+>
+> Get a free OpenRouter API key at [openrouter.ai/keys](https://openrouter.ai/keys).
 
 ### Firestore Security Rules
 
@@ -150,39 +157,48 @@ The rules ensure users can only read and write their own data. Shared resources 
 ```
 classsync/
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── page.tsx            # Schedule (home) page
-│   │   ├── timetable/          # Weekly timetable view
-│   │   ├── notebook/           # AI note summarization
-│   │   ├── flashcards/         # Flashcard decks
-│   │   ├── study-groups/       # Study group finder
-│   │   ├── class/              # Individual class detail
-│   │   ├── profile/            # User profile
-│   │   ├── settings/           # App settings
-│   │   ├── login/              # Authentication
-│   │   └── signup/             # Registration
-│   ├── components/             # Reusable UI components
-│   │   ├── ui/                 # shadcn/ui primitives
-│   │   ├── add-class-form.tsx  # Class creation form
-│   │   ├── class-card.tsx      # Schedule card component
-│   │   ├── summary-history.tsx # AI summary history
-│   │   ├── share-button.tsx    # Resource sharing
-│   │   └── main-layout.tsx     # App shell & navigation
-│   ├── context/                # React context providers
-│   ├── firebase/               # Firebase client setup
-│   │   ├── config.ts           # Firebase app config
-│   │   ├── index.ts            # Exports & initialization
-│   │   └── firestore/          # Firestore hooks
-│   ├── hooks/                  # Custom React hooks
-│   ├── lib/                    # Utilities & type definitions
-│   └── services/               # Data service layer
+│   ├── app/                        # Next.js App Router pages
+│   │   ├── page.tsx                # Schedule (home) page
+│   │   ├── timetable/              # Weekly timetable view
+│   │   ├── notebook/               # Markdown notebook with AI summarization
+│   │   ├── flashcards/             # Flashcard decks & AI generator
+│   │   ├── study-groups/           # Study group finder
+│   │   ├── class/                  # Individual class detail
+│   │   ├── profile/                # User profile
+│   │   ├── settings/               # App settings (theme, accent color)
+│   │   ├── login/                  # Authentication
+│   │   └── signup/                 # Registration
+│   ├── pages/
+│   │   └── api/ai/openrouter/      # Server-side API routes (Pages Router)
+│   │       ├── summarize.ts        # AI note summarization endpoint
+│   │       └── generate-flashcards.ts  # AI flashcard generation endpoint
+│   ├── components/                 # Reusable UI components
+│   │   ├── ui/                     # shadcn/ui primitives
+│   │   ├── add-class-form.tsx      # Class creation form
+│   │   ├── class-card.tsx          # Schedule card component
+│   │   ├── color-theme-provider.tsx # 16-color accent theme system
+│   │   ├── theme-toggle.tsx        # Dark/light mode + accent color picker
+│   │   ├── summary-history.tsx     # AI summary history
+│   │   ├── share-button.tsx        # Resource sharing
+│   │   └── main-layout.tsx         # App shell & navigation
+│   ├── context/                    # React context providers
+│   ├── firebase/                   # Firebase client setup
+│   │   ├── config.ts               # Firebase app config
+│   │   ├── index.ts                # Exports & initialization
+│   │   └── firestore/              # Firestore hooks
+│   ├── hooks/                      # Custom React hooks
+│   ├── lib/                        # Utilities & type definitions
+│   │   ├── markdown-compiler.tsx   # Custom Markdown → React renderer
+│   │   ├── types.ts                # Shared TypeScript interfaces
+│   │   └── utils.ts                # General helpers (cn, etc.)
+│   └── services/                   # Data service layer
 │       ├── FlashcardService.ts
 │       └── NotebookService.ts
-├── public/                     # Static assets & PWA icons
-├── firestore.rules             # Firestore security rules
-├── apphosting.yaml             # Firebase App Hosting config
-├── next.config.ts              # Next.js configuration
-├── tailwind.config.ts          # Tailwind CSS configuration
+├── public/                         # Static assets & PWA icons
+├── firestore.rules                 # Firestore security rules
+├── apphosting.yaml                 # Firebase App Hosting config
+├── next.config.ts                  # Next.js configuration
+├── tailwind.config.ts              # Tailwind CSS configuration
 └── package.json
 ```
 

@@ -14,10 +14,22 @@ export function ThemeToggle() {
   const { colorTheme, setColorTheme } = useColorTheme();
 
   const colorThemes = [
-    { name: 'default', label: 'Default', color: 'hsl(242 80% 70%)' },
-    { name: 'blue', label: 'Blue', color: 'hsl(221 83% 53%)' },
-    { name: 'green', label: 'Green', color: 'hsl(142 76% 36%)' },
-    { name: 'orange', label: 'Orange', color: 'hsl(25 95% 53%)' },
+    { name: 'default', label: 'Default', color: 'hsl(250 80% 65%)' },
+    { name: 'red',     label: 'Red',     color: 'hsl(0 85% 55%)' },
+    { name: 'orange',  label: 'Orange',  color: 'hsl(25 95% 55%)' },
+    { name: 'yellow',  label: 'Yellow',  color: 'hsl(45 95% 45%)' },
+    { name: 'lime',    label: 'Lime',    color: 'hsl(85 80% 45%)' },
+    { name: 'green',   label: 'Green',   color: 'hsl(140 70% 40%)' },
+    { name: 'teal',    label: 'Teal',    color: 'hsl(175 75% 40%)' },
+    { name: 'cyan',    label: 'Cyan',    color: 'hsl(195 90% 45%)' },
+    { name: 'blue',    label: 'Blue',    color: 'hsl(215 90% 55%)' },
+    { name: 'violet',  label: 'Violet',  color: 'hsl(270 75% 60%)' },
+    { name: 'fuchsia', label: 'Fuchsia', color: 'hsl(300 80% 60%)' },
+    { name: 'pink',    label: 'Pink',    color: 'hsl(330 85% 60%)' },
+    { name: 'rose',    label: 'Rose',    color: 'hsl(345 85% 55%)' },
+    { name: 'zinc',    label: 'Zinc',    color: 'hsl(240 5% 45%)' },
+    { name: 'slate',   label: 'Slate',   color: 'hsl(215 15% 45%)' },
+    { name: 'stone',   label: 'Stone',   color: 'hsl(25 10% 45%)' },
   ] as const;
 
   return (
