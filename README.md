@@ -2,30 +2,19 @@
 
 Hi, I'm Mark Angelo Landingin, a 3rd-Year BSCS (Bachelor of Science in Computer Science) student at Universidad de Dagupan. 
 
-I built ClassSync because student life is a constant balancing act. Keeping track of lectures, group projects, class schedules, and preparing for exams gets overwhelming very quickly. I wanted to build a single, cohesive academic companion that handles scheduling and notes while leveraging AI to make studying more efficient. 
-
-ClassSync is a Progressive Web App (PWA) built using Next.js 15, Firebase, and OpenRouter AI. It integrates a smart schedule manager, automated conflict detection, collaborative study group matching, a full markdown notebook, and AI-driven summarization and flashcard generation into a beautiful, personalized interface.
+ClassSync is a Progressive Web App (PWA) built using Next.js 15, Firebase, and OpenRouter AI. It brings schedule management, conflict detection, collaborative study groups, a markdown notebook, and AI-powered study tools together into a single, clean workspace.
 
 ---
 
-## Technical Overview and Core Features
+## Features
 
-I designed ClassSync around the typical workflow of a student, ensuring that each module communicates with the others smoothly.
+Here is a quick look at the features I built:
 
-### Schedule Management and Conflict Detection
-The schedule manager serves as the central hub of the application. Beyond letting users add classes with times, locations, and instructor details, it runs a background validation check. When adding a new class, the system analyzes start and end times against existing classes. If an overlap is found, it raises a conflict alert, preventing students from booking overlapping commitments.
-
-### Markdown Notebook
-Rather than using a plain text area, I built a rich markdown notebook. It features a custom Markdown-to-React compiler that updates a live preview as you type. It also calculates real-time reading estimates, word and character counts, and handles interactive todo checklists.
-
-### AI-Powered Study Tools
-To speed up exam preparation, ClassSync connects to OpenRouter AI (supporting free-tier models). In the notebook, a student can send their lecture notes to the AI server-side endpoint. The API returns a structured, concise summary. Additionally, the AI can parse notes and generate a customized deck of study flashcards, which can be saved to the database.
-
-### Resource Sharing via 6-Digit Codes
-Students often study in groups, so I built a simple, light-weight sharing system. Any timetable, notebook lesson, or flashcard deck can be shared. The system generates a unique 6-digit code linked to the database record. Anyone with the code can view the shared resource instantly, without needing a complex linking or permissions configuration.
-
-### Custom 16-Color Accent Themes
-Aesthetics matter when you spend hours looking at a screen. ClassSync features a theme manager with 16 distinct accent colors (ranging from teal and cobalt to lavender and amber). These accent selections work dynamically alongside standard light, dark, and system modes, persisting across user sessions.
+* **Schedules & Conflicts:** Add classes with location and instructor details. The app checks for overlaps automatically to prevent schedule conflicts.
+* **Markdown Notebook:** A built-in notes editor featuring live preview, word counts, reading time estimates, and interactive checklists.
+* **AI Summaries & Flashcards:** Summarize long lecture notes and auto-generate study flashcard decks using OpenRouter AI.
+* **6-Digit Share Codes:** Instantly share timetables, lessons, or flashcard decks with classmates using a unique code.
+* **Personalized Themes:** Choose from 16 custom accent colors that persist across sessions, supporting light, dark, and system modes.
 
 ---
 
