@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Summary } from "@/lib/types";
 import { format } from 'date-fns';
-import { Book, FileText, ChevronLeft, ChevronDown, Save, Plus, Trash2, Edit3, Search, FileSignature, Sparkles, Menu, Bold, Italic, List, CheckSquare, Quote, Code, Timer } from 'lucide-react';
+import { Book, FileText, ChevronLeft, ChevronDown, Save, Plus, Trash2, Edit3, Search, FileSignature, Sparkles, Menu, Bold, Italic, List, CheckSquare, Quote, Code, Timer, Share2, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSummaries } from '@/context/summaries-context';
 import { useClasses } from '@/context/classes-context';
@@ -22,6 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { renderMarkdown } from '@/lib/markdown-compiler';
+import { ShareButton } from '@/components/share-button';
+import { RedeemCodeDialog } from '@/components/redeem-code-dialog';
 
 export default function NotebookPage() {
   const { classes } = useClasses();
@@ -479,14 +481,25 @@ export default function NotebookPage() {
                 <CardTitle className="font-headline text-md font-semibold text-muted-foreground uppercase tracking-wider">
                   Notes
                 </CardTitle>
-                <Button
-                  onClick={handleCreateNew}
-                  disabled={!selectedSubject}
-                  size="sm"
-                  className="h-8 px-2.5 bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary transition-all rounded-lg"
-                >
-                  <Plus className="h-4 w-4 mr-1" /> New Note
-                </Button>
+                <div className="flex items-center gap-2">
+                  <RedeemCodeDialog expectedType="summary">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-2.5 transition-all rounded-lg"
+                    >
+                      <Hash className="h-3.5 w-3.5 mr-1" /> Import
+                    </Button>
+                  </RedeemCodeDialog>
+                  <Button
+                    onClick={handleCreateNew}
+                    disabled={!selectedSubject}
+                    size="sm"
+                    className="h-8 px-2.5 bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary transition-all rounded-lg"
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> New Note
+                  </Button>
+                </div>
               </div>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -783,6 +796,11 @@ export default function NotebookPage() {
                   >
                     <Edit3 className="w-4 h-4 mr-2" /> Edit Note
                   </Button>
+                  <ShareButton
+                    type="summary"
+                    data={selectedNote}
+                    className="rounded-xl hover:bg-primary/5 hover:text-primary hover:border-primary/20"
+                  />
                   <Button
                     variant="outline"
                     onClick={handleSummarize}
@@ -957,9 +975,16 @@ export default function NotebookPage() {
                     {selectedSubject}
                   </span>
                 </div>
-                <Button onClick={handleCreateNew} size="sm" className="h-8 bg-primary text-primary-foreground px-3 rounded-lg flex items-center ml-auto shrink-0">
-                  <Plus className="h-3.5 w-3.5 mr-1" /> Add
-                </Button>
+                <div className="flex items-center gap-1.5 ml-auto shrink-0">
+                  <RedeemCodeDialog expectedType="summary">
+                    <Button variant="outline" size="sm" className="h-8 px-2.5 rounded-lg">
+                      <Hash className="h-3.5 w-3.5 mr-1" /> Import
+                    </Button>
+                  </RedeemCodeDialog>
+                  <Button onClick={handleCreateNew} size="sm" className="h-8 bg-primary text-primary-foreground px-3 rounded-lg flex items-center">
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                  </Button>
+                </div>
               </div>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -1072,6 +1097,13 @@ export default function NotebookPage() {
                     <Button variant="outline" size="sm" className="h-8 px-2.5 rounded-lg" onClick={handleSummarize} disabled={isSummarizing}>
                       <Sparkles className={cn("w-3.5 h-3.5 mr-1", isSummarizing && "animate-spin")} /> {isSummarizing ? '...' : 'Sum'}
                     </Button>
+                    <ShareButton
+                      type="summary"
+                      data={selectedNote}
+                      className="h-8 w-8 p-0 rounded-lg"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </ShareButton>
                     <Button
                       variant="ghost"
                       size="icon"

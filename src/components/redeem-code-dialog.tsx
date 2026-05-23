@@ -18,9 +18,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 interface RedeemCodeDialogProps {
   expectedType: 'summary' | 'deck' | 'class' | 'schedule';
+  children?: React.ReactNode;
 }
 
-export function RedeemCodeDialog({ expectedType }: RedeemCodeDialogProps) {
+export function RedeemCodeDialog({ expectedType, children }: RedeemCodeDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -142,10 +143,12 @@ export function RedeemCodeDialog({ expectedType }: RedeemCodeDialogProps) {
           if(!val) reset();
       }}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="w-full sm:w-auto h-11">
-            <Hash className="mr-2 h-4 w-4" />
-            Import {typeLabel}
-          </Button>
+          {children || (
+            <Button variant="outline" className="w-full sm:w-auto h-11">
+              <Hash className="mr-2 h-4 w-4" />
+              Import {typeLabel}
+            </Button>
+          )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
