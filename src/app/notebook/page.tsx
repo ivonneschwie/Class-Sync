@@ -424,12 +424,12 @@ export default function NotebookPage() {
       {/* Desktop Layout */}
       <div className={cn(
         "hidden md:grid flex-1 gap-6",
-        showNav ? "md:grid-cols-[240px_320px_1fr]" : "md:grid-cols-1"
+        showNav ? "md:grid-cols-[280px_1fr] xl:grid-cols-[240px_320px_1fr]" : "md:grid-cols-1"
       )}>
 
         {/* PANEL 1: SUBJECT SHELF (Hidden when collapsed) */}
         {showNav && (
-          <Card className="flex flex-col h-[75vh] border bg-background/50 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden animate-in slide-in-from-left-4 duration-200">
+          <Card className="hidden xl:flex flex-col h-[75vh] border bg-background/50 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden animate-in slide-in-from-left-4 duration-200">
             <CardHeader className="p-4 border-b bg-muted/20">
               <CardTitle className="font-headline text-md font-semibold text-muted-foreground uppercase tracking-wider">
                 Subjects

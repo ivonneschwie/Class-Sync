@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@/firebase';
 import { Calendar, Bot, LayoutGrid, BookOpen, Layers, LogOut, Loader2, User as UserIcon, Settings, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -117,8 +117,17 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isUserLoading } = useUser();
-
   const isAuthPage = pathname === '/login' || pathname === '/signup';
+
+  // State to manage the open/collapsed state of the main navigation sidebar
+  const [open, setOpen] = useState(true);
+
+  // Initialize the sidebar open state based on the current viewport on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+      setOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isUserLoading && !user && !isAuthPage) {
@@ -142,10 +151,10 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider open={open} onOpenChange={setOpen}>
         <AppSidebar />
         <SidebarInset className="bg-muted/20">
-            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden">
+            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-md px-4 md:px-6">
                 <SidebarTrigger />
                 <h1 className="font-headline text-lg font-semibold">
                     {navItems.find(item => item.href === pathname)?.label || 'Dashboard'}
